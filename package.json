@@ -6,7 +6,11 @@
     "start": "node node_modules/react-native/local-cli/cli.js start"
   },
   "dependencies": {
+    "immutable": "^3.8.1",
+    "jsrsasign": "^6.1.0",
     "react": "15.3.2",
-    "react-native": "^0.33.0"
+    "react-native": "^0.35.0-rc.0",
+    "redux": "^3.6.0",
+    "redux-saga": "^0.11.1"
   }
 }
