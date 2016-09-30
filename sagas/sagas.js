@@ -3,9 +3,9 @@ import { call, put ,fork} from 'redux-saga/effects'
 import { Map ,List,fromJS} from "immutable";
 import {doSign,constroiMensagem,daSerieTalao,pad2,zeroFill} from "../aux";
 import Alert  from 'react-native';
-//let serverUrl='http://192.168.2.1:5984';
- let serverUrl='http://192.168.1.218:5984'
- let db= 's08set'
+let serverUrl='http://192.168.2.1:5984';
+ // let serverUrl='http://192.168.1.218:5984'
+ let db= 's08'
 
 //let serverUrl='http://192.168.1.104:5984';
 //let serverUrl='http://192.168.10.25:5984'
