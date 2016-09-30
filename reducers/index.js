@@ -113,7 +113,7 @@ const paginaActual = (state =  ([{pagina:"HOME"}]), action) => {
 
                 else {
                    if ( state[stateListLastIndex].contador  == 3) {
-                       return ([{pagina:"HOME"}]);
+                        return state.slice(0,2);
                        break;
                    }
                    else

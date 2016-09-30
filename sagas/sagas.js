@@ -3,11 +3,11 @@ import { call, put ,fork} from 'redux-saga/effects'
 import { Map ,List,fromJS} from "immutable";
 import {doSign,constroiMensagem,daSerieTalao,pad2,zeroFill} from "../aux";
 import Alert  from 'react-native';
-let serverUrl='http://192.168.2.1:5984';
+// let serverUrl='http://192.168.2.1:5984';
  // let serverUrl='http://192.168.1.218:5984'
- let db= 's08'
+ let db= 's08ou'
 
-//let serverUrl='http://192.168.1.104:5984';
+let serverUrl='http://192.168.1.104:5984';
 //let serverUrl='http://192.168.10.25:5984'
 
 //let serverUrl='http://192.168.1.218:5984';
@@ -266,7 +266,7 @@ function saveDDD(docMesa) {
     if(docMesa.aberta == true) {
                   // --> tem de criar novo talao e gerar hash e fechar a mesa
                   // else nao faz nada so mostra talao
-                  makeRequest('GET', serverUrl+'/s08/_design/myViews/_view/exp2?startkey=[' +
+                  makeRequest('GET', serverUrl+'/'+db+'/_design/myViews/_view/exp2?startkey=[' +
                                                        (serieTalao + 1).toString() + ']' +
                                                        '&endkey=[' +
                                                        serieTalao + ']&descending=true&limit=1')
@@ -283,8 +283,12 @@ function saveDDD(docMesa) {
                     if (s.rows[0].value.numTalao !== undefined)
                             numTalao=s.rows[0].value.numTalao
                     // docMesa.type="mesa"
+                    console.log("numnum");
+                    console.log(docMesa.numTalao);
                     docMesa.numTalao=numTalao+1;
                     docMesa.serieTalao = serieTalao;
+                    console.log(docMesa.numTalao);
+
                     resolve({doc: docMesa, hashAnterior: hashAnterior})
 
                   }).catch(function (err) {
@@ -381,17 +385,14 @@ function* fazGravacao(action) {
         //            constroi documento a gravar com numT e serie
 
         if(docHashAnt!=null){
-          console.log(("lixx"+docHashAnt.doc.numTalao+"-"+docHashAnt.doc.serieTalao) );
-              let h5= ""
-              if (!(action.payload.document.taloes==null)) {
-                h5=action.payload.document.taloes.length
-              }
 
-              if(!(docHashAnt.doc.hash==null))docHashAnt.doc.hash.slice(0,5)
+            console.log(("lixx"+docHashAnt.doc.numTalao+"-"+docHashAnt.doc.serieTalao) );
+              // if(!(docHashAnt.doc.hash==null))
+              //           docHashAnt.doc.hash.slice(0,5)
               const preSave = yield call(saveDoc,
                                           {type:"lixo"},
                                           ("lixA"+docHashAnt.doc.serieTalao +"-"+
-                                          docHashAnt.doc.numTalao+"h"+h5
+                                          docHashAnt.doc.numTalao
                                             ) );
 
 

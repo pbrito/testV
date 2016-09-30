@@ -413,7 +413,6 @@ export function daSerieTalao(document) {
       }
     }
   else {
-    console.log("hyuik");
     //entre 1 e 4
     serT = Math.floor(Math.random() * (5 - 1) + 1) + 8;
   }
