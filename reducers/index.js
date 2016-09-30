@@ -3,17 +3,19 @@ import { combineReducers } from 'redux';
 import { Map ,List,fromJS} from "immutable";
 
 
-const empregadosLista = (state = fromJS([]), action) => {  // default state is empty List()}
+const empregadosLista = (state = [], action) => {  // default state is empty List()}
   switch (action.type) {
+  case  "GOTO_PAGINA_FAILED":
+    return ([{id:"erro",key:"erro"}]);
+    break;
   case "ADD_EMPREGADOS":
-    let listaFiltrada=(action.lista.filter(r=>(r.id.slice(0,3)==="org")));
-    return (fromJS(listaFiltrada));
+    return (action.lista);
     break;
   case "USER_FETCH_SUCCEEDED":
     return state;
     break;
   case "REM_EMPREGADOS":
-    return (fromJS([]));
+    return [];
     break;
   case "USER_FETCH_FAILED":
     return state;
@@ -28,14 +30,45 @@ const empregadosLista = (state = fromJS([]), action) => {  // default state is e
 }}
 
 
+const logActions = (state = [], action) => {  // default state is empty List()}
+  switch (action.type) {
+  case  "ADD_LOG":
+    state.push(action.log)
+    if(state.length>40)
+    return state.slice(state.length-40,state.length)
+    else {
+    return state;
+    }
+    break;
+  default:
+    return state;
+
+}}
+
 const paginaActual = (state =  ([{pagina:"HOME"}]), action) => {
+  console.log("@@@@");
+  console.log(state)
+  console.log("GO");
+  console.log(action);
     switch (action.type) {
         case "GOTO_PAGINA":
-        console.log("GOTO_PAGINA");
-        console.log(action.pagina);
-          state.push( (action.pagina))
-          return state;
+          console.log(action.pagina);
+          if(action.pagina.pagina=="EMPREGADOS" && state.length>2)
+          {
+            return state.slice(0,2);
+
+          }
+          else {
+            state.push( (action.pagina))
+            return state;
+          }
           break;
+        case "GOTO_PAGINA_FAILED":
+              return [{pagina:action.message}];
+        break;
+        case "GOTO_PRIMEIRO":
+            return state.slice(0,1).push( (action.pagina));
+        break;
         case "GOTO_HOME":
 
           // return fromJS([{pagina:"HOME"}]);
@@ -56,8 +89,6 @@ const paginaActual = (state =  ([{pagina:"HOME"}]), action) => {
 
          if(state[stateListLastIndex].pagina=="CONTA")
             {
-
-
              if( state[stateListLastIndex].dataComeco==null) {
                let d0= new Date();
                state[stateListLastIndex]= {
@@ -101,11 +132,6 @@ const paginaActual = (state =  ([{pagina:"HOME"}]), action) => {
            break;
         default:
           return state;
-
-
-
-
-
 }}
 
 const inputExperiencia = (state =  {cxNome:"",cxNumContribuinte:"",inserido:false}, action) => {
@@ -153,8 +179,9 @@ const inputExperiencia = (state =  {cxNome:"",cxNumContribuinte:"",inserido:fals
 const appReducers = combineReducers({
   paginaActual,
   inputExperiencia,
+  logActions,
   //navigationState,
-  empregadosLista
+  //empregadosLista
 })
 
 export default appReducers

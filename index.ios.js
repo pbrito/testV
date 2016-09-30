@@ -7,16 +7,19 @@
 import React, { Component } from 'react';
 import {
   AppRegistry,
-  StyleSheet,
-  Text,
-  View,  Alert,
-  TouchableHighlight,
+  StyleSheet,ScrollView,Image,
+  Text,Dimensions,
+  View,  Alert,TextInput,
+  TouchableOpacity,
+  TouchableHighlight,TouchableWithoutFeedback,
 } from 'react-native';
 
 import { createStore, applyMiddleware } from 'redux'
 import createSagaMiddleware from 'redux-saga'
 import appReducers from "./reducers/index"
 import mySaga from './sagas/sagas.js'
+import {imprimeTalaoEcran,certificado,FooterTalao,fraseCHK,doSign,totalLin,reduzLinhas,ordenaPorCategoria} from './aux';
+
 
 
 const sagaMiddleware = createSagaMiddleware({})//{sagaMonitor});
@@ -45,165 +48,438 @@ class testV extends Component {
   }
 
 
-  makeRequest (method, url) {
-    return new Promise(function (resolve, reject) {
-      var xhr = new XMLHttpRequest();
-      xhr.open(method, url);
-      xhr.onload = function () {
-       if (this.status >= 200 && this.status < 300) {
-         resolve(JSON.parse(xhr.response));
-        } else {
-          reject({
-            status: this.status,
-            statusText: xhr.statusText
-          });
-        }
-      };
-      xhr.onerror = function () {
-              Alert.alert(
-                        'Erro',
-                        xhr._response,
-                        [
-                          {text: 'OK', onPress: () => console.log('OK Pressed!')},
-                        ]
-                      );
 
-        reject({
-          status: this.status,
-          statusText: xhr.statusText
-        });
-      };
-      xhr.send();
-    });
+
+  blocoInserir() {
+    if (!store.getState().inputExperiencia.inserido){
+      return (
+        <View style={{ backgroundColor:"lightgray"}} >
+          <Text style={{ padding:20}} >Preencha os dados da factura sff</Text>
+          <View style={{ flex: 1,flexDirection: 'row',justifyContent: 'center'}}>
+              <TextInput
+                  style={{flex:0.8, borderColor: 'gray', borderWidth: 1,
+                          backgroundColor: 'white',height :40,left:10,right:10}}
+                  onChangeText={(text) => {
+                          store.dispatch({
+                            type:"NEW_INPUT",payload:{id:"cxNome",
+                            input:text
+                          }})
+                        }}
+                  placeholder="Insira Nome"
+                  maxLength = {33}
+                  value={store.getState().inputExperiencia.cxNome}
+              />
+              <View style={{flex:0.05}}></View>
+          </View>
+          <View style={{height:10}}></View>
+          <View style={{ flex: 1,flexDirection: 'row',justifyContent: 'center'}}>
+              <TextInput
+                style={{flex:0.5, borderColor: 'gray', borderWidth: 1,
+                  backgroundColor: 'white', height :40,left:10,right:30}}
+                onChangeText={(text) => {/*this.setState({text}) */}}
+                placeholder="Insira Num. Contribuinte"
+                onChangeText={(text) => {
+                  store.dispatch({
+                          type:"NEW_INPUT",payload:{id:"cxNumContribuinte",input:text}
+                        })
+                }}
+                maxLength = {13}
+                value={store.getState().inputExperiencia.cxNumContribuinte}
+              />
+              <View style={{flex:0.1}}></View>
+              <TouchableOpacity style={{flex:0.2}}
+                  onPress={() =>{
+                      let  stateListLastIndex=store.getState().paginaActual.length-1;
+                      let doc=(store.getState().paginaActual[stateListLastIndex].document )
+                      store.dispatch({
+                        type:"SHOW_PAGINA",
+                        payload:{
+                          insere:true,
+                          nome:store.getState().inputExperiencia.cxNome,
+                          contribuinte:store.getState().inputExperiencia.cxNumContribuinte,
+                          document:doc }})
+                    }}
+              >
+                  <View style={{flex:0.3, borderColor: 'gray', borderWidth: 2,
+                        borderRadius: 5,justifyContent: 'center',
+                        backgroundColor: 'lightsteelblue', height :40,}}>
+                      <Text style={{fontWeight: 'bold',
+                           fontSize: 19,padding:10, borderRadius:10}} >Inserir</Text>
+                  </View>
+              </TouchableOpacity>
+              <View style={{flex:0.05}}></View>
+          </View>
+          <View style={{height:10}}></View>
+        </View>)
+    }
+    else {
+      return (
+        <View style={{ backgroundColor:"lightgray"}} >
+          <Text style={{ padding:20}} >Dados Inseridos</Text>
+          <View style={{ flex: 1,flexDirection: 'row',justifyContent: 'center'}}>
+            <Text
+              style={{flex:0.8, borderColor: 'gray',height :40,left:10,right:10}}
+            >
+            Nome:{store.getState().inputExperiencia.cxNome}
+            </Text>
+            <View style={{flex:0.05}}/>
+          </View>
+          <View style={{height:10}}></View>
+          <View style={{ flex: 1,flexDirection: 'row',justifyContent: 'center'}}>
+            <Text
+              style={{flex:0.5, borderColor: 'gray', height :40,left:10,right:30}}
+            >Num.Contribuinte :{store.getState().inputExperiencia.cxNumContribuinte}
+            </Text>
+            <View style={{flex:0.1}}/>
+            <View style={{flex:0.2}}></View>
+            <View style={{flex:0.05}}/>
+          </View>
+          <View style={{height:10}}/>
+        </View>)
+
+    }
+  }
+  desenhaMM(lastP){
+    let mesasEmpregado=lastP.mesas;
+    let permissoesEmpregado= lastP.permissoes;
+
+    let butA=(a,i)=>
+        {
+          var cor="#2EBF1B"//Green
+          var total="";
+          if(a.total===undefined) {
+            cor="#93B5BC"
+          }
+          else{
+            //TODO deve estar aqui a validacao das permissoes?
+            //Mas trata-se de validacao?
+            total=a.total;
+            if(!a.aberta) cor="red"
+            if(!(a.empregado==a.empregadoAtual || permissoesEmpregado )   )
+            {cor="gray"}
+          }
+          let primeButao=()=> console.log("nada");
+          if(cor=="#2EBF1B" || cor=="red" ){
+                      primeButao=() =>{
+                          store.dispatch({type:"SHOW_PAGINA",
+                                        payload:{
+                                          pagina:"CONTA",
+                                          mesa:a.mesa,
+                                          empregado:a.empregadoAtual,
+                                          documento: a.doc,
+                                        }
+                                      })
+                        }
+          }
+          return(
+            <TouchableOpacity key={i}
+              onPress={primeButao}
+              style={[styles.bAzul,
+                      {backgroundColor:cor,borderColor: 'gray',
+                        borderWidth: 2,
+                        borderRadius: 5}
+                ]}>
+                <Text style={{fontSize:27}}>{a.mesa} </Text>
+                <Text style={{fontSize:19}}>{total} </Text>
+            </TouchableOpacity>
+          )
+        }
+
+        let f=[];
+         mesasEmpregado.map(
+          (a,index,i)=>{
+            let las= lastP;
+            // a= {mesa: 8, total: 36.55, doc: Object}
+            // a= numMesa
+            if(typeof(a) !== 'object'){
+              f.push(butA({mesa:a},index))
+            }
+            else {
+              var empA=las.empregadoAtual.split(":")[1]
+              f.push(
+                butA({
+                    mesa:a.mesa,
+                     total:a.total,
+                      empregado:a.doc.empregado,
+                      aberta:a.doc.aberta,
+                      doc:a.doc,
+                      permissoes:las.permissoes,
+                      empregadoAtual:empA },index))
+            }
+        })
+        return (
+
+              <ScrollView>
+                <View style={{flexWrap: "wrap", flex: 1,
+                              flexDirection: 'row',}}>
+                    {f}
+                </View>
+              </ScrollView>
+        )
+
   }
 
+desenhaConta(doc) {
+  if(Object.keys(doc).length === 0)
+  return (
+    <View>
+      <Text>   SEM DOCUMENTO </Text>
+      <Text>------------------------------</Text>
+    </View>)
+
+  let sds=imprimeTalaoEcran(doc);
+  var {height, width} = Dimensions.get('window');
+  let larg=width*9/10
+
+  return (<View style={styles.container}>
+        <ScrollView style={{height:300}}  >
+          <Image
+            style={{width:width}}
+            source={require('./images/6.jpg')}/>
+          <Text style={styles.welcome}>
+            Consulta de Mesa {doc.mesa}
+          </Text>
+          <Text></Text>
+          <View style={{
+              flexWrap: "nowrap",width:larg ,flex: 1,
+              flexDirection: 'column'}}
+          >
+            {sds}
+          </View>
+          <View style={{height:100}}></View>
+          {this.blocoInserir()}
+          {certificado("9fn85",doc)}
+          <View style={{height:100}}></View>
+
+        </ScrollView>
+        <TouchableWithoutFeedback
+            onPress={()=>store.dispatch({type:"SHOW_PAGINA",
+                              payload:{
+                                pagina:"EMPREGADOS",
+                              }})
+                      }
+        >
+            {FooterTalao(doc)}
+        </TouchableWithoutFeedback>
+      </View>)
+}
+
+
+
+
+//-----------
+
+
+
+
   render() {
-    //let serverUrl='http://pbrito.no-ip.info:2030'
-    //let serverUrl='http://192.168.10.25:5984'
-    //let serverUrl='http://192.168.2.1:5984'
-    let usersPath = "_users/_all_docs"
-    let serverUrl='http://192.168.1.104:5984'
 
-    var f3=()=>
-      this.makeRequest('GET',serverUrl+'/_users/_all_docs')
-        .then(response => {
-          var df=response.rows.filter(a=>{if (a.id!="_design/_auth")
-                                                {return a.id}
-                                              })
-          console.log(df);
+    var butao=(txt,id,fn)=> {
+      let pagina=(store.getState().paginaActual[stateListLastIndex].pagina )
+      let lar=85;
+      if (pagina=="EMPREGADOS") lar=300
+        return(
+             <TouchableHighlight style={{height:91,backgroundColor:"yellow",
+               borderWidth:2,flexWrap: 'wrap',
+                         width:80}}
+                         key={txt}
+               onPress={() =>{
+                 store.dispatch(fn)
+                //  if(!(id==null)) //Possible Unhandled Promise Rejection (id: 2):
+                //   fn(id)
+                //   else {
+                //     fn()
+                //   }
+                }
+             }>
 
-          this.setState({mesas:df})
-        }).catch(a=>console.log("dfghjk")
-      );
+                <Text>{txt}</Text>
 
-    var f5=(mesas)=>
-          this.makeRequest('GET', serverUrl+'/s08/_design/appV/_view/mesasAbertas')
-          .then( (datums)=> {
-            var memp=(mesas);
-            datums.rows.map(a=> {
-               if ( memp.includes(a.key) ) {
-                 memp[memp.indexOf(a.key)]={mesa:a.key,total:a.value.total}
-               }
-              return a;
-            }
-          );
-           this.setState({mesas:memp})
-          })
+             </TouchableHighlight>
+        )
+      }
 
-    var f4=(empregado) =>
-            this.makeRequest('GET',serverUrl+'/_users/'+empregado)
-              .then(response => {
-                this.setState({mesas:response.mesas})
-                return response.mesas;
-              }).then(mesas=>
-                f5(mesas)
-              )
-
+      var butaoEmpregado=(txt,id,fn)=> {
+        let pagina=(store.getState().paginaActual[stateListLastIndex].pagina )
+        let lar=30
+          return(
+               <TouchableHighlight
+                        style={{flex: 1,alignItems:"center",
+                                 backgroundColor:"cyan",borderWidth: 2,
+                                 justifyContent:"center",
+                                 width:Dimensions.get('window').width*0.8
+                                     }}
+                         key={id}
+                         onPress={() =>{
+                           store.dispatch(fn)
+                          }
+               }>
+                  <Text style={{fontSize:28}}>{txt}</Text>
+               </TouchableHighlight>
+          )
+        }
 
 
-    var ff= ()=>
-      fetch(`${serverUrl}/${usersPath}`, {
-            method: 'GET',
-        })
-        .then((response) =>{
-          return response.json() })
-        .then((response) => {
+    let  stateListLastIndex=store.getState().paginaActual.length-1;
+    let pagina=(store.getState().paginaActual[stateListLastIndex].pagina )
+    let paginaLength=(store.getState().paginaActual.length )
+    let lastP= store.getState().paginaActual[stateListLastIndex];
 
-                        console.log(response.rows);
-                        this.setState({mesas:response.rows})
-                      })
-        .catch(e => console.log(e))
 
-     var dMesas=(mesas)=> mesas.map((a)=> {
-       var txt=a
-       if(!(a.id==null)) txt=a.id;
-       if(!(a.mesa==null)) txt=a.mesa+"  "+a.total;
 
-       // console.log(a);
-       return(<View   style={{backgroundColor:"blue",width:85}} key={txt} >
-         <TouchableHighlight style={styles.wrapper}
-            onPress={() =>{
-              console.log(a.id);
-              if(!(a.id==null)) //Possible Unhandled Promise Rejection (id: 2):
-               f4(a.id)
-             }
-          }>
-            <View style={styles.button}>
 
-             <Text>{txt}</Text>
-            </View>
-          </TouchableHighlight>
-       </View>)
-     })
-
-    return (
-      <View style={styles.container}>
-        <Text style={styles.welcome}>
-          Welcome to React Native!
-        </Text>
-        <View style={{flex:1,backgroundColor:"cyan",flexDirection:"row",
-          alignItems: "flex-start",flexWrap: 'wrap',
-        width:300}}>
-        {dMesas(this.state.mesas)}
-      </View>
-        <Text style={styles.instructions}>
-          To get started, edit index.android.js
-        </Text>
-        <Text style={styles.instructions}>
-
-          Double tap R on your keyboard to reload,{'\n'}
-          Shake or press menu button for dev menu
-        </Text>
-
-        <TouchableHighlight style={styles.wrapper}
-           onPress={() =>{
-             f3()
-         }
-         }>
-           <View style={styles.button}>
-             <Text>xmlhttp</Text>
-           </View>
-         </TouchableHighlight>
-         <TouchableHighlight style={styles.wrapper}
-            onPress={() =>{
-              ff()
+    var conteudoEmpregados=()=>
+        {
+          if (pagina=="EMPREGADOS") {
+              return store.getState().paginaActual[stateListLastIndex].listaEmpregados.map(
+                (a)=> {
+                   var txt=a.id.split(":")[1];
+                   var emp=a.id ;
+                   return(
+                     butaoEmpregado(txt,a.id,
+                             {type:"SHOW_PAGINA",
+                                           payload:{
+                                             pagina:"MESAS",
+                                             empregado:emp,
+                                           }
+                                         }
+                      )
+                    )
+              })
           }
-          }>
-            <View style={styles.button}>
-              <Text>fetch</Text>
+
+      }
+
+      if (pagina=="CONTA"){
+        var pag=store.getState().paginaActual[stateListLastIndex];
+        var emp=pag.empregado;
+        var mesa=pag.mesa;
+        return this.desenhaConta(pag.documento)
+      }
+      else
+      if (pagina=="EMPREGADOS") {
+        let wi=   Dimensions.get('window').width
+        return(<View style={[styles.container]}>
+          <Text style={styles.welcome}>
+              {pagina}  {emp}  {paginaLength}
+          </Text>
+          <View style={{flex: 1,alignItems:"stretch",
+            backgroundColor:"red",
+             width:Dimensions.get('window').width*0.8
+                }}>
+
+          {conteudoEmpregados()}
+        </View>
+          <View style={{flex:0.1,flexDirection:"row"}}>
+               {butao("xmlhttp","xmlhttp",
+                                {type:"SHOW_PAGINA",
+                                                 payload:{
+                                                   pagina:"EMPREGADOS",
+                                                 }
+                                               }
+                      )}
+
+               {butao("log","log",
+                                {type:"SHOW_PAGINA",
+                                                 payload:{
+                                                   pagina:"LOG",
+                                                 }
+                                               }
+                      )}
+          </View>
+        </View>
+        )
+
+      }
+      if(pagina=="MESAS") {
+        emp=(store.getState().paginaActual[stateListLastIndex].empregadoAtual).split(":")[1]
+        let widD= Dimensions.get('window').width;
+        return (<View style={styles.container}>
+          <Text style={styles.welcome}>
+              {pagina}  {emp}  {paginaLength}
+          </Text>
+          <View style={{flex:1,backgroundColor:"cyan",flexDirection:"row",
+            alignItems: "stretch",flexWrap: 'wrap',
+          width:widD}}>
+
+               {this.desenhaMM(lastP)}
+          </View>
+          <View style={{flex:0.1,flexDirection:"row"}}>
+               {butao("xmlhttp","xmlhttp",
+                                {type:"SHOW_PAGINA",
+                                                 payload:{
+                                                   pagina:"EMPREGADOS",
+                                                 }
+                                               }
+                      )}
+          </View>
+        </View>)
+      }
+      if (pagina=="LOG") {
+        var emp=""
+        let logs=store.getState().logActions.map((a,i)=>
+          <Text style={{flex:1,}} key={i}>{i}{a}</Text>
+        )
+        return (
+          <View style={styles.container}>
+            <Text style={styles.welcome}>
+                {pagina}  {emp}  {paginaLength}
+            </Text>
+              <View style={{flex:1,backgroundColor:"cyan",flexDirection:"column",
+                                    alignItems: "stretch",flexWrap: 'wrap',
+                                    width:300
+                            }}>
+                            {logs}
+                </View>
+            <View style={{flex:0.1,flexDirection:"row"}}>
+                 {butao("xmlhttp","xmlhttp",
+                                  {type:"SHOW_PAGINA",
+                                                   payload:{
+                                                     pagina:"EMPREGADOS",
+                                                   }
+                                                 }
+                        )}
             </View>
-          </TouchableHighlight>
-          <TouchableHighlight style={styles.wrapper}
-             onPress={() =>{
-               this.setState({mesas:[]})
-           }
-           }>
-             <View style={styles.button}>
-               <Text>clear</Text>
-             </View>
-           </TouchableHighlight>
-      </View>
-    );
+          </View>
+        );
+
+      }
+        var emp=""
+        return (
+          <View style={styles.container}>
+            <Text style={styles.welcome}>
+                {pagina}  {emp}  {paginaLength}
+            </Text>
+              <View style={{flex:1,backgroundColor:"cyan",flexDirection:"row",
+                                    alignItems: "stretch",flexWrap: 'wrap',
+                            width:600}}>
+                          <View style={{flex:1,alignItems: "center"}}>
+                            <Text>Sem PAGINA para mostrar</Text>
+                          </View>
+
+                </View>
+            <View style={{flex:0.1,flexDirection:"row"}}>
+                 {butao("xmlhttp","xmlhttp",
+                                  {type:"SHOW_PAGINA",
+                                                   payload:{
+                                                     pagina:"EMPREGADOS",
+                                                   }
+
+                                                 }
+                        )}
+                {butao("log","log",
+                                 {type:"SHOW_PAGINA",
+                                                  payload:{
+                                                    pagina:"LOG",
+                                                  }
+                                                }
+                       )}
+                 {/*butao("fetch","fetch",ff)*/}
+
+            </View>
+          </View>
+        );
+
   }
 }
 
@@ -214,6 +490,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#F5FCFF',
   },
+nome: {
+  fontSize: 30,
+  fontWeight: "bold",
+  textAlign: 'center',
+  margin: 10,
+},
   welcome: {
     fontSize: 20,
     textAlign: 'center',
@@ -231,6 +513,14 @@ const styles = StyleSheet.create({
 button: {
   backgroundColor: '#eeeeee',
   padding: 10,
+},
+bAzul:{
+  width: 110,
+  margin:5,
+  height: 100,
+  backgroundColor: 'powderblue',
+  justifyContent: 'center',
+  alignItems: 'center',
 },
 });
 

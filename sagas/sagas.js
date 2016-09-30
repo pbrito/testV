@@ -2,23 +2,77 @@ import { takeEvery, takeLatest } from 'redux-saga'
 import { call, put ,fork} from 'redux-saga/effects'
 import { Map ,List,fromJS} from "immutable";
 import {doSign,constroiMensagem,daSerieTalao,pad2,zeroFill} from "../aux";
-
-
-
+import Alert  from 'react-native';
 let serverUrl='http://192.168.2.1:5984';
+// let serverUrl='http://192.168.1.218:5984'
+
 //let serverUrl='http://192.168.1.104:5984';
-//let serverUrl='http://192.168.10.25:5984';
+//let serverUrl='http://192.168.10.25:5984'
+
+//let serverUrl='http://192.168.1.218:5984';
+
 //let serverUrl='http://pbrito.no-ip.info:2030'
 
 
-export function makeRequest (method, url) {
-  return new Promise(function (resolve, reject) {
+export function  makeRequest (method, url) {
+
+  var FETCH_TIMEOUT = 1200;
+  return   new Promise(function(resolve, reject) {
+      let timeSim=false;
+      var timeout = setTimeout(function() {
+          reject(new Error('Request timed out'));
+      }, FETCH_TIMEOUT);
+      fetch(url, {  method: method,})
+      .then(function(response) {
+          clearTimeout(timeout);
+          if(timeSim) return;
+          if (response && response.status == 200) {
+            resolve(response.json());
+          }
+          else reject(new Error('Response error'));
+      })
+      .catch(function(err) {
+          reject(err);
+      });
+  })
+
+
+
+return new Promise(function (resolve, reject) {
+  console.log(url);
+  console.log(method);
+
+   fetch(url, {
+           method: method,
+       }).then(resp=>
+         {
+           console.log("####EEE#");
+           setTimeout(() => null, 0);
+           return resp.json()
+         }
+       ).then(
+         json=> {console.log("ZZZZZ");resolve(json)}
+       ).catch(
+         er=> {
+           console.log("PPPPPPPP");
+           reject(er);}
+       )
+
+     })
+return new Promise(function (resolve, reject) {
     var xhr = new XMLHttpRequest();
+    console.log("dfghjk111");
+
     xhr.open(method, url);
     xhr.onload = function () {
+        console.log("onload______d_");
      if (this.status >= 200 && this.status < 300) {
+       console.log("xhr.response------------------");
+       setTimeout(() => null, 0);
        resolve(JSON.parse(xhr.response));
+
       } else {
+
         reject({
           status: this.status,
           statusText: xhr.statusText
@@ -26,6 +80,7 @@ export function makeRequest (method, url) {
       }
     };
     xhr.onerror = function () {
+      console.log("dfghjkqwerty22222");
       reject({
         status: this.status,
         statusText: xhr.statusText
@@ -33,8 +88,51 @@ export function makeRequest (method, url) {
     };
     xhr.send();
   });
-
-}
+    // return new Promise(function (resolve, reject) {
+    //   var xhr = new XMLHttpRequest();
+    //   xhr.open(method, url,true);
+    //   xhr.onload = function () {
+    //     console.log("onload_______");
+    //    if (this.status >= 200 && this.status < 300) {
+    //      console.log("xhr.response");
+    //      console.log(xhr.response);
+    //      resolve(JSON.parse(xhr.response));
+    //     } else {
+    //       reject({
+    //         status: this.status,
+    //         statusText: "xhr.statusText .... meu"
+    //       });
+    //     }
+    //   };
+    //   xhr.onerror = function () {
+    //     console.log(xhr);
+    //           // Alert.alert(
+    //           //           'Erro',
+    //           //           xhr._response,
+    //           //           [
+    //           //             {text: 'OK', onPress: () => console.log('OK Pressed!')},
+    //           //           ]
+    //           //         );
+    //     reject({
+    //       message: "xhr._response",
+    //       statusText: xhr
+    //     });
+    //   };
+    //
+    //   xhr.timeout = 930; // time in milliseconds
+    //
+    //   xhr.ontimeout = function (e) {
+    //     console.log("trime out");
+    //     console.log(e);
+    //     reject({
+    //       status: e,
+    //       statusText: e
+    //     });
+    //   };
+    //
+    //   xhr.send();
+    // });
+  }
 
 function saveDoc(doc,id) {
   // --grava documento
@@ -83,38 +181,8 @@ function saveDoc(doc,id) {
   })
 }
 
-export function fetchMesasAbertas(userId) {
-
-  return  makeRequest('GET', serverUrl+'/s08/_design/appV/_view/mesasAbertas')
-  .then(function (datums) {
-  //  console.log("dddd");
-    return(datums.rows);
-  })
-  .catch(function (err) {
-    throw Error("errrrr fetchMesasAbertas");
-    console.error('Augh, there was an error!', err.statusText);
-  });
-
-          //  return fetch('http://192.168.1.104:5984/s08/_design/appV/_view/mesasAbertas')
-          //     .then((response) => {
-          //       setTimeout(() => null, 0);
-          //       if (!response.ok) {
-          //            throw Error(response.statusText);
-          //        }
-          //       return response.json()
-          //     })
-          //     .then((responseJson) => {
-          //       return responseJson.rows
-          //       //rows -> key,value  value->doc {mesa,empregado,total ...}
-          //     })
-          //     .catch((error) => {
-          //        throw Error(error);
-          //       // console.error(error);
-          //     });
-}
 
 export function fetchMesasEmpregado(userId) {
-
 
   return  makeRequest('GET', serverUrl+'/_users/'+userId)
   .then(function (datums) {
@@ -172,7 +240,7 @@ function* fetchUser(action) {
       }
 
    } catch (e) {
-      yield put({type: "USER_FETCH_FAILED", message: e.message});
+      yield put({type: "USER_FETCH_FAILED", message: e.toString()});
    }
 }
 
@@ -283,7 +351,7 @@ function criaTalaoInsere(docHashAnt) {
 }
 
 
-
+/*
 function* showPagina(action) {
   if(action.payload.insere)
   {
@@ -334,56 +402,164 @@ function* showPagina(action) {
       //yield put({type: "GOTO_PAGINA_FAILED", message: e.message});
    }}
 }
+*/
 
-function fetchMenu() {
 
-   return new Promise(function (resolve, reject) {
-    makeRequest('GET',serverUrl+'/_users/_all_docs')
-    .then(response => {
-      console.log(response);
-      var filt=(response.rows.filter(a=>{if (a.id!="_design/_auth") {return a.id}}  ));
-      var fn = function asyncMesasEmp(empregado){
-         return   makeRequest('GET',serverUrl+'/_users/'+empregado.id)
-         //fetch(serverUrl+'/_users/'+empregado.id)
-      };
+function all_users(){
+  console.log("KKKKKKKK");
+  return makeRequest('GET',serverUrl+'/_users/_all_docs')
+}
 
-      let actions = filt.map( fn  );
-      // console.log(actions);
-      var results = Promise.all(actions).then(
-         a=>
-         {
-           Promise.all(actions).then (a=>
-             {
-               a=a.map(function(a){
-                              return {id:a._id,mesas:a.mesas,permissoes:a.permissoes}
-                      })
-               resolve(a)
-           })
-         }
-        )
-    })
-   })
+function* fetchEmpregados(action) {
+  console.log("gigi");
+  yield put({type: "ADD_LOG", log: "vai fazer fetch dos empregados" });
+
+    try {
+
+        const lista = yield call(all_users, action);
+        yield put({type: "ADD_LOG", log: "ja fez fetch dos empregados" });
+
+        var filt=(lista.rows.filter(a=>{if (a.id!="_design/_auth") {return a.id}}  ));
+
+        yield put({type:"ADD_EMPREGADOS",lista:filt })
+     }
+     catch (e) {
+         console.log("eeeee1");
+         console.log(e);
+         yield put({type: "ADD_LOG", log: "erro pedido f empregados"+e.toString()  });
+         yield put({type: "GOTO_PAGINA_FAILED", message: e});
+     }
+}
+
+function fetchEmpregadoDoc(empregado) {
+  return makeRequest('GET',serverUrl+'/_users/'+empregado)
+}
+function fetchMesasAbertasIntersect(mesas){
+  return new Promise(function (resolve, reject) {
+      makeRequest('GET', serverUrl+'/s08/_design/appV/_view/mesasAbertas')
+      .then( (datums)=> {
+        var memp=(mesas);
+        //Intersecçao
+        datums.rows.map(a=> {
+           if ( memp.includes(a.key) ) {
+             memp[memp.indexOf(a.key)]=
+                  {mesa:a.key,total:a.value.total,doc:a.value}
+           }
+          return a;
+        });
+      resolve(memp)
+
+      }).catch(function (err) {
+          console.log(err);
+          reject(err.statusText)
+          throw Error(err);
+        });
+  })
 }
 
 
 
-
-function* showMenu(action) {
-    const lista = yield call(fetchMenu, action);
+function* fetchMesa(action) {
     try {
-      yield put({type:"ADD_EMPREGADOS",lista:lista  })
+        const resul = yield call(fetchEmpregadoDoc, action.empregado);
+        yield put({type:"ADD_EMPREGADOS",lista:resul.mesas  })
+        const resul2 = yield call(fetchMesasAbertasIntersect, resul.mesas );
+        yield put({type:"ADD_EMPREGADOS",lista:resul2  })
+
      }
      catch (e) {
-       console.log(e.message);
-        //yield put({type: "GOTO_PAGINA_FAILED", message: e.message});
+         console.log("erro");
+         console.log(e);
+         yield put({type: "GOTO_PAGINA_FAILED", message: e.toString()});
      }
+}
+
+function* showPagina(action) {
+  console.log(action);
+  if(action.payload.pagina=="MESAS"){
+
+    const resul = yield call(fetchEmpregadoDoc, action.payload.empregado);
+    console.log("r1");
+    console.log(resul);
+    const resul2 = yield call(fetchMesasAbertasIntersect, resul.mesas );
+    console.log("r2");
+    console.log(resul2);
+
+    yield put({type:  "GOTO_PAGINA", pagina:{pagina:"MESAS",
+                                             contador:0,
+                                             mesas:resul2,
+                                             empregadoAtual:action.payload.empregado,
+                                             permissoes:resul.permissoes,
+                                             document:{},
+                                           }});
+  }
+  if (action.payload.pagina=="EMPREGADOS") {
+    console.log("-----");
+    try {
+      console.log("222");
+        yield put({type: "ADD_LOG", log: "faz pedido empregados" });
+        const lista = yield call(all_users, action);
+        yield put({type: "ADD_LOG", log: "retorna empregados" });
+
+        console.log(lista);
+        var filt=(lista.rows.filter(a=>{if (a.id!="_design/_auth") {return a.id}}  ));
+        console.log(filt);
+        yield put({type:  "GOTO_PAGINA", pagina:{pagina:"EMPREGADOS",
+                                                contador:0,
+                                                listaEmpregados:filt,
+                                               }});
+     }
+     catch (e) {
+         console.log("eeeee2");
+         console.log(e);
+         yield put({type: "ADD_LOG", log: "erro pedido empregados"+e.toString()  });
+         yield put({type: "GOTO_PAGINA_FAILED", message: e.toString() });
+     }
+   }
+   if (action.payload.pagina=="CONTA") {
+     try {
+       if(Object.keys(action.payload.documento).length !== 0)
+        {
+          yield put({type: "ADD_LOG", log: "GOTO CONTA" });
+          yield put({type:  "GOTO_PAGINA",
+                    pagina:{pagina:"CONTA",
+                            empregado:action.payload.empregado,
+                            mesa:action.payload.mesa,
+                            documento:action.payload.documento,
+                            contador:0,
+                          }});
+        }
+      }
+      catch (e) {
+          console.log("eeeee3");
+          console.log(e);
+          yield put({type: "ADD_LOG", log:"GOTO CONTA "+ e.toString() });
+          yield put({type: "GOTO_PAGINA_FAILED", message: e.toString()});
+      }
+    }
+    if ((action.payload.pagina)=="LOG") {
+      try {
+
+        yield put({type:  "GOTO_PAGINA",
+                   pagina:{pagina:"LOG",
+                           contador:0,
+                         }});
+       }
+       catch (e) {
+           console.log("eeeee3");
+           console.log(e);
+           yield put({type: "ADD_LOG", log:"GOTO LOG "+ e.toString() });
+           yield put({type: "GOTO_PAGINA_FAILED", message: e.toString()});
+       }
+     }
+
 }
 /*
   Starts fetchUser on each dispatched `USER_FETCH_REQUESTED` action.
   Allows concurrent fetches of user.
 */
 function* mySaga() {
-  yield* takeEvery("USER_FETCH_REQUESTED", fetchUser);
+  yield* takeEvery("FETCH_MESAS", fetchMesa);
 }
 
 function* mySaga2() {
@@ -391,26 +567,15 @@ function* mySaga2() {
 }
 
 function* mySaga3() {
-  yield* takeEvery("SHOW_MENU", showMenu);
+  yield* takeEvery("FETCH_EMPREGADOS", fetchEmpregados);
 }
-/*
-  Alternatively you may use takeLatest.
 
-  Does not allow concurrent fetches of user. If "USER_FETCH_REQUESTED" gets
-  dispatched while a fetch is already pending, that pending fetch is cancelled
-  and only the latest one will be run.
-*/
-// function* mySaga() {
-//   yield* takeLatest("USER_FETCH_REQUESTED", fetchUser);
-// }
-
-//export default mySaga;
 
 export default function* root() {
   yield [
-    fork(mySaga),
+    //fork(mySaga),
     fork(mySaga2),
-    fork(mySaga3),
+    //fork(mySaga3),
     // fork(watchCheckout)
   ]
 }

@@ -120,6 +120,111 @@ export function reduzLinhas(rows) {
   return aR;
 }
 
+export function FooterTalao(doc){
+   return(
+    <View style={{ flex: 1,flexDirection: 'row',justifyContent:"space-between",
+                    backgroundColor:'antiquewhite', bottom:0,
+                     height:70,maxHeight:80,alignSelf: 'stretch'}}>
+          <View style={{ flex:1,flexDirection: 'row',flexWrap:"nowrap",marginLeft:35}}>
+                <Text style={{fontWeight: 'bold',
+                              fontSize: 42,marginTop:20}}>TOTAL
+                </Text>
+                <View style={{width: 15,}}></View>
+                <Text style={{fontSize: 18,marginTop:40}}>
+                                         (IVA incluido)
+                </Text>
+          </View>
+          <View style={{ alignItems:"flex-end",}}>
+                  <Text style={{fontSize: 42,fontWeight: 'bold',
+                      flexWrap:"nowrap",marginTop:20,marginRight:55}}>
+                    {totalLin (doc).toFixed(2)} €
+                  </Text>
+          </View>
+    </View>
+  )
+}
+function totalIvas(document) {
+       var impT = [];
+      //  console.log(document);
+       var tf = reduzLinhas(document.linhaConta);
+       var tf2 = ordenaPorCategoria(tf);
+       var b1 = 0.0;
+       var iva13 = 0.0;
+       var iva23 = 0.0;
+
+       tf2.map(function (a) {
+         var pr1 = parseFloat(a.preco * a.quantidadeLinha / 100).toFixed(2);
+         var prc = 0.0;
+         if (a.preco !== undefined) {
+           prc = a.preco;
+         }
+         if (a.combo) {
+           prc = a.precoCombo;
+         }
+         if (a.iva !== undefined) {
+           b1 = b1 + parseFloat(prc * a.quantidadeLinha / 100) / (1 + a.iva);
+         }
+         if (a.iva == 0.13) {
+           iva13 = iva13 + parseFloat(prc * a.quantidadeLinha / 100) - parseFloat(prc * a.quantidadeLinha / 100) / (1 + a.iva);
+         }
+         if (a.iva == 0.23) {
+           iva23 = iva23 + parseFloat(prc * a.quantidadeLinha / 100) - parseFloat(prc * a.quantidadeLinha / 100) / (1 + a.iva);
+         }
+       });
+
+       var final = [parseFloat(iva23).toFixed(2), parseFloat(iva13).toFixed(2)];
+
+       return final;
+     }
+
+export function certificado(ultimaHash,doc){
+    let ivas =totalIvas(doc)
+    return(
+      <View style={{top:100}}>
+        <View  style={{flex: 1, flexDirection: 'column',
+                      paddingTop:10,
+                      alignItems:'center',
+                      justifyContent:'center',}} >
+                      <Text style={{textAlign: 'center',
+                                  width: Dimensions.get('window').width
+                      }}>
+                        {fraseCHK(doc.ultimaOrderReference )}
+                      </Text>
+
+          <View style={{
+                    borderColor: 'gray', borderWidth: 1,
+
+                    paddingLeft:20,
+                    paddingRight:20,}}>
+              <View style={{flex: 1}}>
+                <Text style={{paddingBottom:10, textAlign: 'center'}}>
+                   IVA
+                </Text>
+              </View>
+              <View style={{flex: 1,flexDirection: 'row',}}>
+                <Text style={{textAlign: 'center'}}>
+                 * 13%   ......    {ivas[1]}     + 23%   ......    {ivas[0]}    - Comb
+                </Text>
+              </View>
+
+          </View>
+          <Text >
+            {ultimaHash}
+            -Processado por programa certificado nº 2280/AT
+          </Text>
+          <View style={{height:150}}>
+
+          </View>
+
+        </View>
+
+
+      </View>
+    )
+
+
+  }
+
 export function imprimeTalaoEcran(document) {
     //doSign("mensagem")
     var impT = [];
