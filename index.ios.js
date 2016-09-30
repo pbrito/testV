@@ -248,16 +248,15 @@ desenhaConta(doc) {
           </View>
           <View style={{height:100}}></View>
           {this.blocoInserir()}
-          {certificado("9fn85",doc)}
+          {certificado(doc)}
           <View style={{height:100}}></View>
 
         </ScrollView>
         <TouchableWithoutFeedback
-            onPress={()=>store.dispatch({type:"SHOW_PAGINA",
-                              payload:{
-                                pagina:"EMPREGADOS",
-                              }})
-                      }
+                      onPress={()=>store.dispatch({
+                                      type:"GOTO_HOME",payload:{}})
+                                  }
+
         >
             {FooterTalao(doc)}
         </TouchableWithoutFeedback>
@@ -268,8 +267,6 @@ desenhaConta(doc) {
 
 
 //-----------
-
-
 
 
   render() {
@@ -351,9 +348,15 @@ desenhaConta(doc) {
       }
 
       if (pagina=="CONTA"){
+        console.log("CONTA STATE");
+        console.log(store.getState());
+        console.log(stateListLastIndex);
         var pag=store.getState().paginaActual[stateListLastIndex];
+        console.log(pag);
         var emp=pag.empregado;
+        console.log(emp);
         var mesa=pag.mesa;
+        console.log(mesa);
         return this.desenhaConta(pag.documento)
       }
       else
@@ -430,6 +433,7 @@ desenhaConta(doc) {
                                     width:300
                             }}>
                             {logs}
+
                 </View>
             <View style={{flex:0.1,flexDirection:"row"}}>
                  {butao("xmlhttp","xmlhttp",
@@ -437,8 +441,11 @@ desenhaConta(doc) {
                                                    payload:{
                                                      pagina:"EMPREGADOS",
                                                    }
+
                                                  }
                         )}
+
+
             </View>
           </View>
         );

@@ -177,8 +177,15 @@ function totalIvas(document) {
        return final;
      }
 
-export function certificado(ultimaHash,doc){
+export function certificado(doc){
     let ivas =totalIvas(doc)
+    var ultimaHash='';
+    if (doc.ultimaHashReference!==undefined) {
+      ultimaHash=doc.ultimaHashReference[0]+
+            doc.ultimaHashReference[10]+
+            doc.ultimaHashReference[20]+
+            doc.ultimaHashReference[30]
+    }
     return(
       <View style={{top:100}}>
         <View  style={{flex: 1, flexDirection: 'column',
@@ -305,16 +312,7 @@ export function imprimeTalaoEcran(document) {
           }
         });
 
-        final.push(
-                  <View style={{height:nl}}></View>)
-        // var l=14-tf2.length;
-        // if(l>0){
-        //   var nl = (l * 40).toString() + "px";
-        //   final.push(
-        //      <View style={{ }} key={tf2.length+1} >
-        //      <Text   style={{ }}> </Text>
-        //      </View>)
-        //   }
+        final.push(<View style={{height:nl}} key="talaoEcran"></View>);
         return (final);
      }
 
@@ -327,12 +325,16 @@ export function     totalLin(document)  {
         if (document.linhaConta.length>0)
         t1=document.linhaConta.map(f3).reduce(function  (a,b){return (a+b);}) ;
         return t1
-      }
+}
 
-export function     fraseCHK(ultimaOrderReference ){
-        if(ultimaOrderReference )
-        return "No. CHK" +(ultimaOrderReference).toString()
-      }
+export function   fraseCHK(ultimaOrderReference ){
+        if(ultimaOrderReference ){
+          return "No. CHK" +(ultimaOrderReference).toString();
+        }
+        else {
+          return "";
+        }
+}
 
 
 
@@ -345,10 +347,8 @@ export function zeroFill(number, width) {
   return number;
 }
 export function pad2(number) {
-
   return (number < 10 ? '0' : '') + number;
 }
-
 
 export function doSign(mensagem) {
 

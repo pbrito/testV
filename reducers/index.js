@@ -34,8 +34,8 @@ const logActions = (state = [], action) => {  // default state is empty List()}
   switch (action.type) {
   case  "ADD_LOG":
     state.push(action.log)
-    if(state.length>40)
-    return state.slice(state.length-40,state.length)
+    if(state.length>50)
+    return state.slice(state.length-5,state.length)
     else {
     return state;
     }
@@ -56,7 +56,6 @@ const paginaActual = (state =  ([{pagina:"HOME"}]), action) => {
           if(action.pagina.pagina=="EMPREGADOS" && state.length>2)
           {
             return state.slice(0,2);
-
           }
           else {
             state.push( (action.pagina))

@@ -3,8 +3,9 @@ import { call, put ,fork} from 'redux-saga/effects'
 import { Map ,List,fromJS} from "immutable";
 import {doSign,constroiMensagem,daSerieTalao,pad2,zeroFill} from "../aux";
 import Alert  from 'react-native';
-let serverUrl='http://192.168.2.1:5984';
-// let serverUrl='http://192.168.1.218:5984'
+//let serverUrl='http://192.168.2.1:5984';
+ let serverUrl='http://192.168.1.218:5984'
+ let db= 's08set'
 
 //let serverUrl='http://192.168.1.104:5984';
 //let serverUrl='http://192.168.10.25:5984'
@@ -152,7 +153,7 @@ function saveDoc(doc,id) {
     }
     var xhrCreate = new XMLHttpRequest();
 
-    xhrCreate.open(htpMode,serverUrl+'/s08/'+id, true);
+    xhrCreate.open(htpMode,serverUrl+'/'+db+'/'+id, true);
     xhrCreate.setRequestHeader("Content-type", "application/json");
 
     xhrCreate.onerror = function () {
@@ -177,72 +178,71 @@ function saveDoc(doc,id) {
     };
     xhrCreate.send(JSON.stringify(doc));
 
-
   })
 }
 
 
-export function fetchMesasEmpregado(userId) {
-
-  return  makeRequest('GET', serverUrl+'/_users/'+userId)
-  .then(function (datums) {
-  return({mesas:datums.mesas ,
-          permissoes: datums.permissoes });
-  })
-  .catch(function (err) {
-     throw Error("errrrr fetchMesasEmpregado");
-  console.error('Augh, there was an error!', err.statusText);
-  });
-
-          //  return fetch('http://192.168.1.104:5984/_users/'+userId)
-          //     .then((response) => {
-          //       setTimeout(() => null, 0);
-          //       // console.log(response)
-          //       if (!response.ok) {
-          //            throw Error(response.statusText);
-          //        }
-          //       return response.json()
-          //     }
-          //     )
-          //     .then((responseJson) => {
-          //       return {mesas:responseJson.mesas ,
-          //               permissoes: responseJson.permissoes }
-          //     })
-          //     .catch((error) => {
-          //        throw Error(error);
-          //     });
-}
+// export function fetchMesasEmpregado(userId) {
+//
+//   return  makeRequest('GET', serverUrl+'/_users/'+userId)
+//   .then(function (datums) {
+//     return({mesas:datums.mesas ,
+//           permissoes: datums.permissoes });
+//   })
+//   .catch(function (err) {
+//      throw Error("errrrr fetchMesasEmpregado");
+//   console.error('Augh, there was an error!', err.statusText);
+//   });
+//
+//           //  return fetch('http://192.168.1.104:5984/_users/'+userId)
+//           //     .then((response) => {
+//           //       setTimeout(() => null, 0);
+//           //       // console.log(response)
+//           //       if (!response.ok) {
+//           //            throw Error(response.statusText);
+//           //        }
+//           //       return response.json()
+//           //     }
+//           //     )
+//           //     .then((responseJson) => {
+//           //       return {mesas:responseJson.mesas ,
+//           //               permissoes: responseJson.permissoes }
+//           //     })
+//           //     .catch((error) => {
+//           //        throw Error(error);
+//           //     });
+// }
 
 // worker Saga: will be fired on USER_FETCH_REQUESTED actions
-function* fetchUser(action) {
-  let mapMesasAbertas = new Map();
-  try {
-      // const user ={mesas: [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18],
-      //                                               permissoes:false}
-      // const user = yield call(fetchMesasEmpregado, action.payload.empregado);
-      // yield put({type: "USER_FETCH_SUCCEEDED", user:{mesas: user.mesas,
-      //                                               permissoes:user.permissoes}});
-
-      if(!action.payload.permissoes ||  action.payload.modal ){
-            const mesas = yield call(fetchMesasAbertas, action.payload.empregado);
-            mesas.forEach(function(a){
-              mapMesasAbertas=mapMesasAbertas.set(a.key,a.value)
-            })
-            yield put({type: "MESAS_FETCH_SUCCEEDED", mesas: mesas});
-            yield put({type:  "GOTO_PAGINA", pagina:{pagina:"MESAS",
-                                                     empregado:action.payload.empregado,
-                                                     mesasAbertas:mapMesasAbertas,
-                                                     permissoes:true}});
-      }
-      else {
-          yield put({type:"GOTO_HOME",payload:{ modal:true,
-                                                empregado:action.payload.empregado,}});
-      }
-
-   } catch (e) {
-      yield put({type: "USER_FETCH_FAILED", message: e.toString()});
-   }
-}
+// function* fetchUser(action) {
+//   let mapMesasAbertas = new Map();
+//   try {
+//       // const user ={mesas: [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18],
+//       //                                               permissoes:false}
+//       // const user = yield call(fetchMesasEmpregado, action.payload.empregado);
+//       // yield put({type: "USER_FETCH_SUCCEEDED", user:{mesas: user.mesas,
+//       //                                               permissoes:user.permissoes}});
+//
+//       if(!action.payload.permissoes ||  action.payload.modal ){
+//             const mesas = yield call(fetchMesasAbertas, action.payload.empregado);
+//             mesas.forEach(function(a){
+//               mapMesasAbertas=mapMesasAbertas.set(a.key,a.value)
+//             })
+//             yield put({type: "MESAS_FETCH_SUCCEEDED", mesas: mesas});
+//             yield put({type:  "GOTO_PAGINA", pagina:{pagina:"MESAS",
+//                                                      empregado:action.payload.empregado,
+//                                                      mesasAbertas:mapMesasAbertas,
+//                                                      permissoes:true}});
+//       }
+//       else {
+//           yield put({type:"GOTO_HOME",payload:{ modal:true,
+//                                                 empregado:action.payload.empregado,}});
+//       }
+//
+//    } catch (e) {
+//       yield put({type: "USER_FETCH_FAILED", message: e.toString()});
+//    }
+// }
 
 
 
@@ -308,6 +308,8 @@ function saveMesa(arrM) {
   let docMesa=arrM.docMesa;
   let docTalao=arrM.docTalao;
   let idTalao =arrM.idTalao;
+  console.log("##saveM#");
+console.log(docMesa.linhaConta);
   for (var i = 0; i < docMesa.linhaConta.length; i++) {
         if (docMesa.linhaConta[i].orderReferences === undefined)
                 docMesa.linhaConta[i].orderReferences = [docTalao.serieTalao + "/" + docTalao.numTalao];
@@ -330,7 +332,7 @@ function saveMesa(arrM) {
 function criaTalaoInsere(docHashAnt) {
   let document=    docHashAnt.doc  ;
   let hashAnterior=    docHashAnt.hashAnterior
-  //cria Talao e insere na BD
+console.log("cria Talao e insere na BD");
   var d = new Date();
   var h = zeroFill(d.getHours(), 2);
   var m = zeroFill(d.getMinutes(), 2);
@@ -347,66 +349,92 @@ function criaTalaoInsere(docHashAnt) {
   document.hora = ka;
   document.data = [d.getFullYear(), 1 + d.getMonth(), d.getDate()];
   document.type = "talao";
+  console.log(document);
   return saveDoc(document);//promessa
+
 }
 
 
-/*
-function* showPagina(action) {
-  if(action.payload.insere)
-  {
-      let docMesa=action.payload.document;
-      docMesa.nomeCliente=action.payload.nome;
-      docMesa.numContribuinte=action.payload.contribuinte
-      const inserido= yield call(saveDoc,docMesa);
-      yield put({type:"INSERE_NUM_CONT"})
-  }
-  else
+
+function* fazGravacao(action) {
+
+  console.log("Vai gravar");
+  console.log(action);
+  // if(action.payload.insere)
+  // {
+  //     let docMesa=action.payload.document;
+  //     docMesa.nomeCliente=action.payload.nome;
+  //     docMesa.numContribuinte=action.payload.contribuinte
+  //     const inserido= yield call(saveDoc,docMesa);
+  //     yield put({type:"INSERE_NUM_CONT"})
+  // }
+  // else
   if (action.payload.document!= undefined)
-  {try {
-    let docMesa=action.payload.document;
-    const docHashAnt = yield call(saveDDD,JSON.parse(JSON.stringify(docMesa)) );
+  {
+    try {
+        let docMesa=action.payload.document;
+        const docHashAnt = yield call(saveDDD,
+            JSON.parse(JSON.stringify(docMesa)) );
 
-    //TODO por aqui if aberta chama saveDDD
-    //TODO mudar o nome saveDDD porque nao faz nenhum save o que faz é
-    //            constroi documento a gravar com numT e serie
+        //TODO por aqui if aberta chama saveDDD
+        //TODO mudar o nome saveDDD porque nao faz nenhum save o que faz é
+        //            constroi documento a gravar com numT e serie
+
+        if(docHashAnt!=null){
+          console.log(("lixx"+docHashAnt.doc.numTalao+"-"+docHashAnt.doc.serieTalao) );
+              let h5= ""
+              if (!(action.payload.document.taloes==null)) {
+                h5=action.payload.document.taloes.length
+              }
+
+              if(!(docHashAnt.doc.hash==null))docHashAnt.doc.hash.slice(0,5)
+              const preSave = yield call(saveDoc,
+                                          {type:"lixo"},
+                                          ("lixA"+docHashAnt.doc.serieTalao +"-"+
+                                          docHashAnt.doc.numTalao+"h"+h5
+                                            ) );
 
 
-    if(docHashAnt!=null){
-          const preSave = yield call(saveDoc,{type:"lixo"},("lix"+
-          docHashAnt.doc.numTalao  +"-"+docHashAnt.doc.serieTalao) );
+              const inserido= yield call(criaTalaoInsere,docHashAnt);
+              const talaoIn = yield call(saveMesa,{docMesa: docMesa,
+                                                    docTalao: inserido.doc,
+                                                    idTalao: inserido.response.id
+                                                      });
+              yield put({type:  "GOTO_PAGINA",
+                        pagina:{pagina:"CONTA",
+                                empregado:action.payload.empregado,
+                                mesa:talaoIn.doc.mesa,
+                                documento:talaoIn.doc,
+                                contador:0,
+                              }});
+        }
+        let numContribuinte="";
+        let nomeCliente="";
+        if(docMesa.numContribuinte!==null)
+            numContribuinte = docMesa.numContribuinte
+        if(docMesa.nomeCliente!==null)
+            nomeCliente = docMesa.nomeCliente
 
-          const inserido= yield call(criaTalaoInsere,docHashAnt);
-          const talaoIn = yield call(saveMesa,{docMesa:docMesa,
-                                                docTalao:inserido.doc,
-                                                idTalao:inserido.response.id
-                                                  });
-    }
-    let numContribuinte="";
-    let nomeCliente="";
-    if(docMesa.numContribuinte!==null)
-        numContribuinte = docMesa.numContribuinte
-    if(docMesa.nomeCliente!==null)
-        nomeCliente = docMesa.nomeCliente
-    yield put({type:"CLEAR_INPUT",payload:{
-                            numContribuinte: numContribuinte ,
-                            nomeCliente: nomeCliente } })
-    yield put({type:  "GOTO_PAGINA", pagina:{pagina:"CONTA",
-                                            contador:0,
-                                             empregadoAtual:action.payload.empregadoAtual,
-                                             document:action.payload.document,
-                                             }});
+        // yield put({type:"CLEAR_INPUT",payload:{
+        //                         numContribuinte: numContribuinte ,
+        //                         nomeCliente: nomeCliente } })
+            // ?????? É preciso?Já esta na pagina....
+        // yield put({type:  "GOTO_PAGINA", pagina:{pagina:"CONTA",
+        //                                         contador:0,
+        //                                          empregadoAtual:action.payload.empregadoAtual,
+        //                                          document:action.payload.document,
+        //                                          }});
    } catch (e) {
-     console.log("FGHJKLKJHGFD");
+     console.log("error fazGrava "+e.message);
      console.log(e);
       //yield put({type: "GOTO_PAGINA_FAILED", message: e.message});
    }}
 }
-*/
+
 
 
 function all_users(){
-  console.log("KKKKKKKK");
+  console.log("All_users makeRequest");
   return makeRequest('GET',serverUrl+'/_users/_all_docs')
 }
 
@@ -434,9 +462,10 @@ function* fetchEmpregados(action) {
 function fetchEmpregadoDoc(empregado) {
   return makeRequest('GET',serverUrl+'/_users/'+empregado)
 }
+
 function fetchMesasAbertasIntersect(mesas){
   return new Promise(function (resolve, reject) {
-      makeRequest('GET', serverUrl+'/s08/_design/appV/_view/mesasAbertas')
+      makeRequest('GET', serverUrl+'/'+db+'/_design/appV/_view/mesasAbertas')
       .then( (datums)=> {
         var memp=(mesas);
         //Intersecçao
@@ -496,7 +525,7 @@ function* showPagina(action) {
   if (action.payload.pagina=="EMPREGADOS") {
     console.log("-----");
     try {
-      console.log("222");
+        console.log("222");
         yield put({type: "ADD_LOG", log: "faz pedido empregados" });
         const lista = yield call(all_users, action);
         yield put({type: "ADD_LOG", log: "retorna empregados" });
@@ -510,7 +539,7 @@ function* showPagina(action) {
                                                }});
      }
      catch (e) {
-         console.log("eeeee2");
+         console.log("erro w672");
          console.log(e);
          yield put({type: "ADD_LOG", log: "erro pedido empregados"+e.toString()  });
          yield put({type: "GOTO_PAGINA_FAILED", message: e.toString() });
@@ -518,6 +547,8 @@ function* showPagina(action) {
    }
    if (action.payload.pagina=="CONTA") {
      try {
+       console.log("CONTA");
+       console.log(action.payload);
        if(Object.keys(action.payload.documento).length !== 0)
         {
           yield put({type: "ADD_LOG", log: "GOTO CONTA" });
@@ -528,6 +559,14 @@ function* showPagina(action) {
                             documento:action.payload.documento,
                             contador:0,
                           }});
+
+          if(action.payload.documento.aberta)
+          yield put({type:"GRAVA_CONTA",
+                      payload:{ document:action.payload.documento,
+                                empregado:action.payload.empregado,
+                                                    numContribuinte: "" ,
+                                                    nomeCliente: "" } })
+          //save Documento
         }
       }
       catch (e) {
@@ -539,7 +578,6 @@ function* showPagina(action) {
     }
     if ((action.payload.pagina)=="LOG") {
       try {
-
         yield put({type:  "GOTO_PAGINA",
                    pagina:{pagina:"LOG",
                            contador:0,
@@ -558,8 +596,11 @@ function* showPagina(action) {
   Starts fetchUser on each dispatched `USER_FETCH_REQUESTED` action.
   Allows concurrent fetches of user.
 */
+// function* mySaga() {
+//   yield* takeEvery("FETCH_MESAS", fetchMesa);
+// }
 function* mySaga() {
-  yield* takeEvery("FETCH_MESAS", fetchMesa);
+  yield* takeEvery("GRAVA_CONTA", fazGravacao);
 }
 
 function* mySaga2() {
@@ -573,7 +614,7 @@ function* mySaga3() {
 
 export default function* root() {
   yield [
-    //fork(mySaga),
+    fork(mySaga),
     fork(mySaga2),
     //fork(mySaga3),
     // fork(watchCheckout)
