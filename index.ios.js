@@ -90,14 +90,15 @@ class testV extends Component {
               <TouchableOpacity style={{flex:0.2}}
                   onPress={() =>{
                       let  stateListLastIndex=store.getState().paginaActual.length-1;
-                      let doc=(store.getState().paginaActual[stateListLastIndex].document )
+                      let doc=(store.getState().paginaActual[stateListLastIndex].documento )
                       store.dispatch({
                         type:"SHOW_PAGINA",
                         payload:{
+                          pagina:"CONTA",
                           insere:true,
                           nome:store.getState().inputExperiencia.cxNome,
                           contribuinte:store.getState().inputExperiencia.cxNumContribuinte,
-                          document:doc }})
+                          documento:doc }})
                     }}
               >
                   <View style={{flex:0.3, borderColor: 'gray', borderWidth: 2,

@@ -138,8 +138,16 @@ const inputExperiencia = (state =  {cxNome:"",cxNumContribuinte:"",inserido:fals
     switch (action.type) {
         case "NEW_INPUT":
           if(action.payload.id=="limpa"){
-              return {cxNome:action.payload.cxNome ,
-                cxNumContribuinte:action.payload.cxNumContribuinte,
+            let numCont="";
+            let nmCl=""
+
+            if (!(action.payload.cxNome==null))
+              nmCl=action.payload.cxNome;
+            if (!(action.payload.cxNumContribuinte==null))
+              numCont=action.payload.cxNumContribuinte;
+
+              return {cxNome:nmCl ,
+                cxNumContribuinte:numCont,
                 inserido:false
                 };
               }

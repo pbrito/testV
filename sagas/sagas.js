@@ -3,11 +3,11 @@ import { call, put ,fork} from 'redux-saga/effects'
 import { Map ,List,fromJS} from "immutable";
 import {doSign,constroiMensagem,daSerieTalao,pad2,zeroFill} from "../aux";
 import Alert  from 'react-native';
-// let serverUrl='http://192.168.2.1:5984';
+let serverUrl='http://192.168.2.1:5984';
  // let serverUrl='http://192.168.1.218:5984'
- let db= 's08ou'
+ let db= 's08'
 
-let serverUrl='http://192.168.1.104:5984';
+// let serverUrl='http://192.168.1.104:5984';
 //let serverUrl='http://192.168.10.25:5984'
 
 //let serverUrl='http://192.168.1.218:5984';
@@ -163,9 +163,14 @@ function saveDoc(doc,id) {
      if (this.status >= 200 && this.status < 300) {
        console.log("response-----");
         console.log(xhrCreate.response);
+        let jsResp=JSON.parse(xhrCreate.response)
+        doc._id=jsResp.id;
+        doc._rev=jsResp.rev;
         resolve(
           {response:JSON.parse(xhrCreate.response),
-            doc:doc
+            doc:doc,
+            id:jsResp.id,
+            rev:jsResp.rev
             }
         );
 
@@ -447,8 +452,7 @@ function* fetchEmpregados(action) {
 
         const lista = yield call(all_users, action);
         yield put({type: "ADD_LOG", log: "ja fez fetch dos empregados" });
-
-        var filt=(lista.rows.filter(a=>{if (a.id!="_design/_auth") {return a.id}}  ));
+        var filt=(lista.rows.filter(a=>{if (a.id!="_design/_auth" && a.id!="org.couchdb.user:nuno") {return a.id}}  ));
 
         yield put({type:"ADD_EMPREGADOS",lista:filt })
      }
@@ -506,6 +510,7 @@ function* fetchMesa(action) {
 
 function* showPagina(action) {
   console.log(action);
+
   if(action.payload.pagina=="MESAS"){
 
     const resul = yield call(fetchEmpregadoDoc, action.payload.empregado);
@@ -532,7 +537,7 @@ function* showPagina(action) {
         yield put({type: "ADD_LOG", log: "retorna empregados" });
 
         console.log(lista);
-        var filt=(lista.rows.filter(a=>{if (a.id!="_design/_auth") {return a.id}}  ));
+        var filt=(lista.rows.filter(a=>{if (a.id!="_design/_auth" && a.id!="org.couchdb.user:nuno") {return a.id}}  ));
         console.log(filt);
         yield put({type:  "GOTO_PAGINA", pagina:{pagina:"EMPREGADOS",
                                                 contador:0,
@@ -550,6 +555,17 @@ function* showPagina(action) {
      try {
        console.log("CONTA");
        console.log(action.payload);
+       if (action.payload.insere)
+        {
+         let docMesa=action.payload.documento;
+         docMesa.nomeCliente=action.payload.nome;
+         docMesa.numContribuinte=action.payload.contribuinte
+         console.log(".-----------");
+         console.log(docMesa);
+         const inserido= yield call(saveDoc,docMesa);
+         yield put({type: "INSERE_NUM_CONT" })
+       }
+      else{
        if(Object.keys(action.payload.documento).length !== 0)
         {
           yield put({type: "ADD_LOG", log: "GOTO CONTA" });
@@ -560,6 +576,11 @@ function* showPagina(action) {
                             documento:action.payload.documento,
                             contador:0,
                           }});
+         yield put({type: "NEW_INPUT",
+                            payload:{id:"limpa",
+                              cxNome:action.payload.documento.nomeCliente ,
+                              cxNumContribuinte:action.payload.documento.numContribuinte}
+                    });
 
           if(action.payload.documento.aberta)
           yield put({type:"GRAVA_CONTA",
@@ -569,6 +590,8 @@ function* showPagina(action) {
                                                     nomeCliente: "" } })
           //save Documento
         }
+
+      }
       }
       catch (e) {
           console.log("eeeee3");
