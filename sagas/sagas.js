@@ -17,56 +17,42 @@ let serverUrl='http://192.168.2.1:5984';
 
 export function  makeRequest (method, url) {
 
-  var FETCH_TIMEOUT = 1200;
-  return   new Promise(function(resolve, reject) {
-      let timeSim=false;
-      var timeout = setTimeout(function() {
-          reject(new Error('Request timed out'));
-      }, FETCH_TIMEOUT);
-      fetch(url, {  method: method,})
-      .then(function(response) {
-          clearTimeout(timeout);
-          if(timeSim) return;
-          if (response && response.status == 200) {
-            resolve(response.json());
-          }
-          else reject(new Error('Response error'));
-      })
-      .catch(function(err) {
-          reject(err);
-      });
-  })
+
+  // return   new Promise(function(resolve, reject) {
+  //     var timeout = setTimeout(function() {
+  //         reject(new Error('Request timed out'));
+  //     }, FETCH_TIMEOUT);
+  //
+  //     fetch(url, {  method: method,})
+  //     .then(function(response) {
+  //         clearTimeout(timeout);
+  //         if(timeSim) return;
+  //         if (response && response.status == 200) {
+  //           resolve(response.json());
+  //         }
+  //         else reject(new Error('Response error'));
+  //     })
+  //     .catch(function(err) {
+  //         reject(err);
+  //     });
+  // })
+
 
 
 
 return new Promise(function (resolve, reject) {
-  console.log(url);
-  console.log(method);
-
-   fetch(url, {
-           method: method,
-       }).then(resp=>
-         {
-           console.log("####EEE#");
-           setTimeout(() => null, 0);
-           return resp.json()
-         }
-       ).then(
-         json=> {console.log("ZZZZZ");resolve(json)}
-       ).catch(
-         er=> {
-           console.log("PPPPPPPP");
-           reject(er);}
-       )
-
-     })
-return new Promise(function (resolve, reject) {
+    var FETCH_TIMEOUT = 880;
+    var timeout = setTimeout(function() {
+        reject(new Error('Request timed out'));
+    }, FETCH_TIMEOUT);
     var xhr = new XMLHttpRequest();
+
     console.log("dfghjk111");
 
     xhr.open(method, url);
     xhr.onload = function () {
         console.log("onload______d_");
+          clearTimeout(timeout);
      if (this.status >= 200 && this.status < 300) {
        console.log("xhr.response------------------");
        setTimeout(() => null, 0);
@@ -82,12 +68,22 @@ return new Promise(function (resolve, reject) {
     };
     xhr.onerror = function () {
       console.log("dfghjkqwerty22222");
+        clearTimeout(timeout);
       reject({
         status: this.status,
         statusText: xhr.statusText
       });
     };
     xhr.send();
+    xhr.ontimeout = function (e) {
+       console.log("trime out");
+       clearTimeout(timeout);
+       console.log(e);
+       reject({
+         status: e,
+         statusText: e
+       });
+     };
   });
     // return new Promise(function (resolve, reject) {
     //   var xhr = new XMLHttpRequest();
@@ -318,7 +314,7 @@ function saveMesa(arrM) {
   let docTalao=arrM.docTalao;
   let idTalao =arrM.idTalao;
   console.log("##saveM#");
-console.log(docMesa.linhaConta);
+  console.log(docMesa.linhaConta);
   for (var i = 0; i < docMesa.linhaConta.length; i++) {
         if (docMesa.linhaConta[i].orderReferences === undefined)
                 docMesa.linhaConta[i].orderReferences = [docTalao.serieTalao + "/" + docTalao.numTalao];
@@ -341,7 +337,7 @@ console.log(docMesa.linhaConta);
 function criaTalaoInsere(docHashAnt) {
   let document=    docHashAnt.doc  ;
   let hashAnterior=    docHashAnt.hashAnterior
-console.log("cria Talao e insere na BD");
+  console.log("cria Talao e insere na BD");
   var d = new Date();
   var h = zeroFill(d.getHours(), 2);
   var m = zeroFill(d.getMinutes(), 2);
@@ -358,7 +354,7 @@ console.log("cria Talao e insere na BD");
   document.hora = ka;
   document.data = [d.getFullYear(), 1 + d.getMonth(), d.getDate()];
   document.type = "talao";
-  console.log(document);
+  // console.log(document);
   return saveDoc(document);//promessa
 
 }
@@ -369,15 +365,6 @@ function* fazGravacao(action) {
 
   console.log("Vai gravar");
   console.log(action);
-  // if(action.payload.insere)
-  // {
-  //     let docMesa=action.payload.document;
-  //     docMesa.nomeCliente=action.payload.nome;
-  //     docMesa.numContribuinte=action.payload.contribuinte
-  //     const inserido= yield call(saveDoc,docMesa);
-  //     yield put({type:"INSERE_NUM_CONT"})
-  // }
-  // else
   if (action.payload.document!= undefined)
   {
     try {
@@ -391,9 +378,7 @@ function* fazGravacao(action) {
 
         if(docHashAnt!=null){
 
-            console.log(("lixx"+docHashAnt.doc.numTalao+"-"+docHashAnt.doc.serieTalao) );
-              // if(!(docHashAnt.doc.hash==null))
-              //           docHashAnt.doc.hash.slice(0,5)
+              console.log(("lixx"+docHashAnt.doc.numTalao+"-"+docHashAnt.doc.serieTalao) );
               const preSave = yield call(saveDoc,
                                           {type:"lixo"},
                                           ("lixA"+docHashAnt.doc.serieTalao +"-"+
@@ -414,23 +399,13 @@ function* fazGravacao(action) {
                                 contador:0,
                               }});
         }
-        let numContribuinte="";
-        let nomeCliente="";
-        if(docMesa.numContribuinte!==null)
-            numContribuinte = docMesa.numContribuinte
-        if(docMesa.nomeCliente!==null)
-            nomeCliente = docMesa.nomeCliente
 
-        // yield put({type:"CLEAR_INPUT",payload:{
-        //                         numContribuinte: numContribuinte ,
-        //                         nomeCliente: nomeCliente } })
-            // ?????? É preciso?Já esta na pagina....
-        // yield put({type:  "GOTO_PAGINA", pagina:{pagina:"CONTA",
-        //                                         contador:0,
-        //                                          empregadoAtual:action.payload.empregadoAtual,
-        //                                          document:action.payload.document,
-        //                                          }});
    } catch (e) {
+
+
+     var menErr="Sem mensagem de erro"
+     if (!(e==null)) {menErr=e.toString()  }
+     yield put({type: "ADD_LOG", log: "erro fazGravacao"+menErr  });
      console.log("error fazGrava "+e.message);
      console.log(e);
       //yield put({type: "GOTO_PAGINA_FAILED", message: e.message});
@@ -458,9 +433,11 @@ function* fetchEmpregados(action) {
      }
      catch (e) {
          console.log("eeeee1");
-         console.log(e);
-         yield put({type: "ADD_LOG", log: "erro pedido f empregados"+e.toString()  });
-         yield put({type: "GOTO_PAGINA_FAILED", message: e});
+
+         var menErr="Sem mensagem de erro"
+         if (!(e==null)) {menErr=e.toString()  }
+         yield put({type: "ADD_LOG", log: "erro pedido f empregados"+menErr });
+         yield put({type: "GOTO_PAGINA_FAILED", message: menErr});
      }
 }
 
@@ -503,8 +480,12 @@ function* fetchMesa(action) {
      }
      catch (e) {
          console.log("erro");
-         console.log(e);
-         yield put({type: "GOTO_PAGINA_FAILED", message: e.toString()});
+
+         var menErr="Sem mensagem de erro"
+         if (!(e==null)) {menErr=e.toString()  }
+
+         yield put({type: "ADD_LOG", log: "erro pedido fetchMesa"+ menErr });
+         yield put({type: "GOTO_PAGINA_FAILED", message: menErr});
      }
 }
 
@@ -512,21 +493,31 @@ function* showPagina(action) {
   console.log(action);
 
   if(action.payload.pagina=="MESAS"){
+    try {
+      const resul = yield call(fetchEmpregadoDoc, action.payload.empregado);
+      console.log("r1");
+      console.log(resul);
+      const resul2 = yield call(fetchMesasAbertasIntersect, resul.mesas );
+      console.log("r2");
+      console.log(resul2);
 
-    const resul = yield call(fetchEmpregadoDoc, action.payload.empregado);
-    console.log("r1");
-    console.log(resul);
-    const resul2 = yield call(fetchMesasAbertasIntersect, resul.mesas );
-    console.log("r2");
-    console.log(resul2);
+      yield put({type:  "GOTO_PAGINA", pagina:{pagina:"MESAS",
+                                               contador:0,
+                                               mesas:resul2,
+                                               empregadoAtual:action.payload.empregado,
+                                               permissoes:resul.permissoes,
+                                               document:{},
+                                             }});
+     }
+     catch (e) {
+         console.log("erro regegoi");
+         var menErr="Sem mensagem de erro"
+         if (!(e==null)) {menErr=e.toString()  }
+           yield put({type: "ADD_LOG", log: "erro showpagina pedido empregados"+menErr });
+           yield put({type: "GOTO_PAGINA_FAILED", message: menErr });
 
-    yield put({type:  "GOTO_PAGINA", pagina:{pagina:"MESAS",
-                                             contador:0,
-                                             mesas:resul2,
-                                             empregadoAtual:action.payload.empregado,
-                                             permissoes:resul.permissoes,
-                                             document:{},
-                                           }});
+
+     }
   }
   if (action.payload.pagina=="EMPREGADOS") {
     console.log("-----");
@@ -546,9 +537,10 @@ function* showPagina(action) {
      }
      catch (e) {
          console.log("erro w672");
-         console.log(e);
-         yield put({type: "ADD_LOG", log: "erro pedido empregados"+e.toString()  });
-         yield put({type: "GOTO_PAGINA_FAILED", message: e.toString() });
+         var menErr="Sem mensagem de erro"
+         if (!(e==null)) {menErr=e.toString()  }
+         yield put({type: "ADD_LOG", log: "erro showpagina pedido empregados"+menErr  });
+         yield put({type: "GOTO_PAGINA_FAILED", message: menErr });
      }
    }
    if (action.payload.pagina=="CONTA") {
@@ -595,9 +587,10 @@ function* showPagina(action) {
       }
       catch (e) {
           console.log("eeeee3");
-          console.log(e);
-          yield put({type: "ADD_LOG", log:"GOTO CONTA "+ e.toString() });
-          yield put({type: "GOTO_PAGINA_FAILED", message: e.toString()});
+          var menErr="Sem mensagem de erro"
+          if (!(e==null)) {menErr=e.toString()  }
+          yield put({type: "ADD_LOG", log:"GOTO CONTA "+ menErr });
+          yield put({type: "GOTO_PAGINA_FAILED", message: menErr});
       }
     }
     if ((action.payload.pagina)=="LOG") {
@@ -609,9 +602,10 @@ function* showPagina(action) {
        }
        catch (e) {
            console.log("eeeee3");
-           console.log(e);
-           yield put({type: "ADD_LOG", log:"GOTO LOG "+ e.toString() });
-           yield put({type: "GOTO_PAGINA_FAILED", message: e.toString()});
+           var menErr="Sem mensagem de erro"
+           if (!(e==null)) {menErr=e.toString()  }
+           yield put({type: "ADD_LOG", log:"GOTO LOG "+ menErr });
+           yield put({type: "GOTO_PAGINA_FAILED", message: menErr});
        }
      }
 

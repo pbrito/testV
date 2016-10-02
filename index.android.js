@@ -33,18 +33,19 @@ sagaMiddleware.run(mySaga)
 class testV extends Component {
   constructor(props) {
     super(props);
-    this.state = {mesas: [] };
-  }
-
-  componentDidMount() {
+    this.state = {mesas: [] ,contadorConta:0};
     this.unsubscribe =
-              store.subscribe(() =>
-                    this.forceUpdate()
+              store.subscribe(() =>{
+                    this.forceUpdate()}
               );
   }
 
+  componentDidMount() {
+
+  }
+
   componentWillUnmount() {
-    this.unsubscribe();
+    //this.unsubscribe();
   }
 
 
@@ -52,6 +53,10 @@ class testV extends Component {
 
   blocoInserir() {
     if (!store.getState().inputExperiencia.inserido){
+      let  stateListLastIndex=store.getState().paginaActual.length-1;
+      let cnt=(store.getState().paginaActual[stateListLastIndex].contador )
+      let cnt2= this.state.contadorConta;
+
       return (
         <View style={{ backgroundColor:"lightgray"}} >
           <Text style={{ padding:20}} >Preencha os dados da factura sff</Text>
@@ -140,7 +145,7 @@ class testV extends Component {
 
     }
   }
-  desenhaMM(lastP){
+  desenhaMesasMenu(lastP){
     let mesasEmpregado=lastP.mesas;
     let permissoesEmpregado= lastP.permissoes;
 
@@ -221,11 +226,27 @@ class testV extends Component {
   }
 
 desenhaConta(doc) {
-  if(Object.keys(doc).length === 0)
+
+  let  stateListLastIndex=store.getState().paginaActual.length-1;
+  let cnt=(store.getState().paginaActual[stateListLastIndex].contador )
+  let cnt2= this.state.contadorConta;
+
+ if(Object.keys(doc).length === 0)
   return (
     <View>
       <Text>   SEM DOCUMENTO </Text>
-      <Text>------------------------------</Text>
+       <Text>------------------------------</Text>
+
+        <View style={{ flex: 1,flexDirection: 'row',justifyContent:"space-between",
+                        backgroundColor:'antiquewhite', bottom:0,
+                         height:170,maxHeight:180,alignSelf: 'stretch'}}>
+
+        </View>
+
+
+
+
+
     </View>)
 
   let sds=imprimeTalaoEcran(doc);
@@ -254,9 +275,9 @@ desenhaConta(doc) {
 
         </ScrollView>
         <TouchableWithoutFeedback
-                      onPress={()=>store.dispatch({
-                                      type:"GOTO_HOME",payload:{}})
-                                  }
+          onPress={()=>store.dispatch({
+                          type:"GOTO_HOME",payload:{}})
+                      }
 
         >
             {FooterTalao(doc)}
@@ -275,19 +296,16 @@ desenhaConta(doc) {
     var butao=(txt,id,fn)=> {
       let pagina=(store.getState().paginaActual[stateListLastIndex].pagina )
       let lar=85;
-      if (pagina=="EMPREGADOS") lar=300
-        return(
-             <TouchableHighlight style={{height:91,backgroundColor:"yellow",
+      if (pagina=="EMPREGADOS") {
+        lar=300;
+      }
+      return(
+             <TouchableHighlight style={{height:91,backgroundColor:"green",
                borderWidth:2,flexWrap: 'wrap',
                          width:80}}
                          key={txt}
                onPress={() =>{
                  store.dispatch(fn)
-                //  if(!(id==null)) //Possible Unhandled Promise Rejection (id: 2):
-                //   fn(id)
-                //   else {
-                //     fn()
-                //   }
                 }
              }>
 
@@ -353,11 +371,11 @@ desenhaConta(doc) {
         console.log(store.getState());
         console.log(stateListLastIndex);
         var pag=store.getState().paginaActual[stateListLastIndex];
-        console.log(pag);
-        var emp=pag.empregado;
-        console.log(emp);
-        var mesa=pag.mesa;
-        console.log(mesa);
+        // console.log(pag);
+        // var emp=pag.empregado;
+        // console.log(emp);
+        // var mesa=pag.mesa;
+        // console.log(mesa);
         return this.desenhaConta(pag.documento)
       }
       else
@@ -406,7 +424,7 @@ desenhaConta(doc) {
             alignItems: "stretch",flexWrap: 'wrap',
           width:widD}}>
 
-               {this.desenhaMM(lastP)}
+               {this.desenhaMesasMenu(lastP)}
           </View>
           <View style={{flex:0.1,flexDirection:"row"}}>
                {butao("xmlhttp","xmlhttp",
