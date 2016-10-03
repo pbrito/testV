@@ -86,7 +86,7 @@ const paginaActual = (state =  ([{pagina:"HOME"}]), action) => {
 
           }
 
-         if(state[stateListLastIndex].pagina=="CONTA")
+         if(state[stateListLastIndex].pagina=="CONTAa")
             {
              if( state[stateListLastIndex].dataComeco==null) {
                let d0= new Date();
@@ -112,7 +112,7 @@ const paginaActual = (state =  ([{pagina:"HOME"}]), action) => {
 
 
                 else {
-                   if ( state[stateListLastIndex].contador  == 3) {
+                   if ( state[stateListLastIndex].contador  == 2) {
                         return state.slice(0,2);
                        break;
                    }

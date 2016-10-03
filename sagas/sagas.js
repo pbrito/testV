@@ -7,7 +7,8 @@ let serverUrl='http://192.168.2.1:5984';
  // let serverUrl='http://192.168.1.218:5984'
  let db= 's08'
 
-// let serverUrl='http://192.168.1.104:5984';
+
+ // let serverUrl='http://192.168.1.104:5984';
 //let serverUrl='http://192.168.10.25:5984'
 
 //let serverUrl='http://192.168.1.218:5984';
@@ -247,8 +248,10 @@ function saveDoc(doc,id) {
 
 
 
+//  docMesa_atualiza - constroi documento a gravar com numT e serie
 
-function saveDDD(docMesa) {
+function docMesa_atualiza(docMesa) {
+
   return new Promise(function (resolve, reject) {
 
     let serieTalao=1;
@@ -295,7 +298,7 @@ function saveDDD(docMesa) {
                   }).catch(function (err) {
                     console.log(err);
                     reject(err.statusText)
-                      throw Error("errrrr saveDDD");
+                      throw Error("errrrr docMesa_atualiza");
                       console.error('Augh, there was an error!', err.statusText);
                     });
 
@@ -369,12 +372,10 @@ function* fazGravacao(action) {
   {
     try {
         let docMesa=action.payload.document;
-        const docHashAnt = yield call(saveDDD,
+        const docHashAnt = yield call(docMesa_atualiza,
             JSON.parse(JSON.stringify(docMesa)) );
 
-        //TODO por aqui if aberta chama saveDDD
-        //TODO mudar o nome saveDDD porque nao faz nenhum save o que faz é
-        //            constroi documento a gravar com numT e serie
+        //TODO por aqui if aberta chama docMesa_atualiza
 
         if(docHashAnt!=null){
 

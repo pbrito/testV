@@ -124,6 +124,7 @@ export function FooterTalao(doc){
    return(
     <View style={{ flex: 1,flexDirection: 'row',justifyContent:"space-between",
                     backgroundColor:'antiquewhite', bottom:0,
+                    width: 600,
                      height:70,maxHeight:80,alignSelf: 'stretch'}}>
           <View style={{ flex:1,flexDirection: 'row',flexWrap:"nowrap",marginLeft:35}}>
                 <Text style={{fontWeight: 'bold',

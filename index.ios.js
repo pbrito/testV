@@ -33,7 +33,7 @@ sagaMiddleware.run(mySaga)
 class testV extends Component {
   constructor(props) {
     super(props);
-    this.state = {mesas: [] ,contadorConta:0};
+    this.state = {mesas: [] ,contadorConta:0,dataComeco:0};
     this.unsubscribe =
               store.subscribe(() =>{
                     this.forceUpdate()}
@@ -59,7 +59,7 @@ class testV extends Component {
 
       return (
         <View style={{ backgroundColor:"lightgray"}} >
-          <Text style={{ padding:20}} >Preencha os dados da factura sff</Text>
+          <Text style={{ padding:20}} >{cnt2}Preencha os dados da factura sff    v1.0</Text>
           <View style={{ flex: 1,flexDirection: 'row',justifyContent: 'center'}}>
               <TextInput
                   style={{flex:0.8, borderColor: 'gray', borderWidth: 1,
@@ -274,14 +274,37 @@ desenhaConta(doc) {
           <View style={{height:100}}></View>
 
         </ScrollView>
-        <TouchableWithoutFeedback
-          onPress={()=>store.dispatch({
-                          type:"GOTO_HOME",payload:{}})
-                      }
+        <TouchableOpacity
+          onPress={()=>{
+            let d0= new Date();
+            var intervalo = d0 - this.state.dataComeco;
+            if (intervalo > 1220)
+            {
+              var dataCo= new Date();
+              this.setState({contadorConta:0,dataComeco:dataCo})
+            }
+            else {
+              if ( this.state.contadorConta == 4) {
+                  this.setState({contadorConta:0,dataComeco:0})
+                store.dispatch({
+                              type:"GOTO_HOME",payload:{}})
+              }
+              else
+               {
+                 var conta =this.state.contadorConta+1
+                 this.setState({contadorConta: conta,
+                                dataComeco:this.state.dataComeco})
+             }
+            }
+            // store.dispatch({
+            //               type:"GOTO_HOME",payload:{}})
+            //
+            }
+          }
 
         >
             {FooterTalao(doc)}
-        </TouchableWithoutFeedback>
+        </TouchableOpacity>
       </View>)
 }
 
@@ -408,6 +431,7 @@ desenhaConta(doc) {
                                                  }
                                                }
                       )}
+              <Text>v1.0</Text>
           </View>
         </View>
         )
