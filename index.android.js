@@ -395,15 +395,7 @@ desenhaConta(doc) {
       }
 
       if (pagina=="CONTA"){
-        console.log("CONTA STATE");
-        console.log(store.getState());
-        console.log(stateListLastIndex);
         var pag=store.getState().paginaActual[stateListLastIndex];
-        // console.log(pag);
-        // var emp=pag.empregado;
-        // console.log(emp);
-        // var mesa=pag.mesa;
-        // console.log(mesa);
         return this.desenhaConta(pag.documento)
       }
       else

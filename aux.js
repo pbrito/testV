@@ -35,9 +35,6 @@ export function ordenaPorCategoria(arrP) {
 
 
 export  function objPosArr(vs,pr,arr){
-  // console.log(vs);
-  // console.log(pr);
-  // console.log(arr);
   for(var i=0;i<arr.length;i++){
     if( arr[i].codProduto==vs   ){
       return {obj:arr[i],pos:i};
@@ -146,7 +143,6 @@ export function FooterTalao(doc){
 }
 function totalIvas(document) {
        var impT = [];
-      //  console.log(document);
        var tf = reduzLinhas(document.linhaConta);
        var tf2 = ordenaPorCategoria(tf);
        var b1 = 0.0;
@@ -405,7 +401,6 @@ export function daSerieTalao(document) {
   //se ja tiver saido um talao fica na mesma serie
   if (document.taloes !== undefined)
     {
-      console.log("677777");
       if(!docMesa.taloes[0].serieTalao==null)  {serT = document.taloes[0].serieTalao;
       }
       else {

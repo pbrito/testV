@@ -25,17 +25,12 @@ export function  makeRequest (method, url) {
       }, FETCH_TIMEOUT);
       var xhr = new XMLHttpRequest();
 
-      console.log("dfghjk111");
-
       xhr.open(method, url);
       xhr.onload = function () {
-          console.log("onload______d_");
           clearTimeout(timeout);
           if (this.status >= 200 && this.status < 300) {
-             console.log("xhr.response------------------");
              setTimeout(() => null, 0);
              resolve(JSON.parse(xhr.response));
-
           } else {
             reject({
             status: this.status,
@@ -44,7 +39,6 @@ export function  makeRequest (method, url) {
           }
       };
       xhr.onerror = function () {
-        console.log("dfghjkqwerty22222");
         clearTimeout(timeout);
         reject({
           status: this.status,
@@ -53,9 +47,7 @@ export function  makeRequest (method, url) {
       };
       xhr.send();
       xhr.ontimeout = function (e) {
-         console.log("trime out");
          clearTimeout(timeout);
-         console.log(e);
          reject({
            status: e,
            statusText: e
@@ -86,12 +78,13 @@ function saveDoc(doc,id) {
     xhrCreate.setRequestHeader("Content-type", "application/json");
 
     xhrCreate.onerror = function () {
-      console.log("erro a guardar na BD");
+      reject({
+        status:"erro a guardar na BD",
+        statusText: "erro a guardar na BD"
+      });
     };
     xhrCreate.onload = function () {
      if (this.status >= 200 && this.status < 300) {
-       console.log("response-----");
-        console.log(xhrCreate.response);
         let jsResp=JSON.parse(xhrCreate.response)
         doc._id=jsResp.id;
         doc._rev=jsResp.rev;
@@ -144,8 +137,6 @@ function docMesa_atualiza(docMesa) {
                                                        '&endkey=[' +
                                                        serieTalao + ']&descending=true&limit=1')
                   .then(function (s) {
-                    console.log("ultimo Document");
-                    console.log(s);
                     let hashAnterior="";
                     let idAnterior = "";
                     let numTalao=1;
@@ -155,17 +146,12 @@ function docMesa_atualiza(docMesa) {
                             {hashAnterior = s.rows[0].value.hash};
                     if (s.rows[0].value.numTalao !== undefined)
                             numTalao=s.rows[0].value.numTalao
-                    // docMesa.type="mesa"
-                    console.log("numnum");
-                    console.log(docMesa.numTalao);
                     docMesa.numTalao=numTalao+1;
                     docMesa.serieTalao = serieTalao;
-                    console.log(docMesa.numTalao);
 
                     resolve({doc: docMesa, hashAnterior: hashAnterior})
 
                   }).catch(function (err) {
-                    console.log(err);
                     reject(err.statusText)
                       throw Error("errrrr docMesa_atualiza");
                       console.error('Augh, there was an error!', err.statusText);
@@ -184,8 +170,7 @@ function saveMesa(arrM) {
   let docMesa=arrM.docMesa;
   let docTalao=arrM.docTalao;
   let idTalao =arrM.idTalao;
-  console.log("##saveM#");
-  console.log(docMesa.linhaConta);
+
   for (var i = 0; i < docMesa.linhaConta.length; i++) {
         if (docMesa.linhaConta[i].orderReferences === undefined)
                 docMesa.linhaConta[i].orderReferences = [docTalao.serieTalao + "/" + docTalao.numTalao];
@@ -207,8 +192,7 @@ function saveMesa(arrM) {
 
 function criaTalaoInsere(docHashAnt) {
   let document=    docHashAnt.doc  ;
-  let hashAnterior=    docHashAnt.hashAnterior
-  console.log("cria Talao e insere na BD");
+  let hashAnterior=    docHashAnt.hashAnterior;
   var d = new Date();
   var h = zeroFill(d.getHours(), 2);
   var m = zeroFill(d.getMinutes(), 2);
@@ -225,7 +209,6 @@ function criaTalaoInsere(docHashAnt) {
   document.hora = ka;
   document.data = [d.getFullYear(), 1 + d.getMonth(), d.getDate()];
   document.type = "talao";
-  // console.log(document);
   return saveDoc(document);//promessa
 
 }
@@ -234,8 +217,6 @@ function criaTalaoInsere(docHashAnt) {
 
 function* fazGravacao(action) {
 
-  console.log("Vai gravar");
-  console.log(action);
   if (action.payload.document!= undefined)
   {
     try {
@@ -246,8 +227,6 @@ function* fazGravacao(action) {
         //TODO por aqui if aberta chama docMesa_atualiza
 
         if(docHashAnt!=null){
-
-              console.log(("lixx"+docHashAnt.doc.numTalao+"-"+docHashAnt.doc.serieTalao) );
               const preSave = yield call(saveDoc,
                                           {type:"lixo"},
                                           ("lixA"+docHashAnt.doc.serieTalao +"-"+
@@ -275,8 +254,6 @@ function* fazGravacao(action) {
      var menErr="Sem mensagem de erro"
      if (!(e==null)) {menErr=e.toString()  }
      yield put({type: "ADD_LOG", log: "erro fazGravacao"+menErr  });
-     console.log("error fazGrava "+e.message);
-     console.log(e);
       //yield put({type: "GOTO_PAGINA_FAILED", message: e.message});
    }}
 }
@@ -284,18 +261,15 @@ function* fazGravacao(action) {
 
 
 function all_users(){
-  console.log("All_users makeRequest");
   return makeRequest('GET',serverUrl+'/_users/_all_docs')
 }
 
 function fetchMesaDoc(num){
-  console.log("MesaDoc makeRequest "+num);
   let zz=makeRequest('GET',serverUrl+'/'+db+'/_design/appV/_view/mesasAbertas?key='+num)
   return zz;
 }
 
 function* fetchEmpregados(action) {
-  console.log("gigi");
   yield put({type: "ADD_LOG", log: "vai fazer fetch dos empregados" });
 
     try {
@@ -307,8 +281,6 @@ function* fetchEmpregados(action) {
         yield put({type:"ADD_EMPREGADOS",lista:filt })
      }
      catch (e) {
-         console.log("eeeee1");
-
          var menErr="Sem mensagem de erro"
          if (!(e==null)) {menErr=e.toString()  }
          yield put({type: "ADD_LOG", log: "erro pedido f empregados"+menErr });
@@ -362,11 +334,8 @@ function* fetchMesa(action) {
 }
 
 function* showPagina(action) {
-  console.log(action);
-
   if(action.payload.pagina=="MESAS"){
     try {
-      console.log("----- pag MESAS  -----");
       const resul = yield call(fetchEmpregadoDoc, action.payload.empregado);
       const resul2 = yield call(fetchMesasAbertasIntersect, resul.mesas );
 
@@ -381,7 +350,6 @@ function* showPagina(action) {
      catch (e) {
          var menErr="Sem mensagem de erro"
          if (!(e==null)) {menErr=e.toString()  }
-         console.log("erro showPagina MESAS"+menErr);
          yield put({type: "ADD_LOG", log: "erro showpagina pedido empregados"+menErr });
          yield put({type: "GOTO_PAGINA_FAILED", message: menErr });
      }
@@ -392,9 +360,7 @@ function* showPagina(action) {
         yield put({type: "ADD_LOG", log: "faz pedido empregados" });
         const lista = yield call(all_users, action);
         yield put({type: "ADD_LOG", log: "retorna empregados" });
-        console.log(lista);
         var filt=(lista.rows.filter(a=>{if (a.id!="_design/_auth" && a.id!="org.couchdb.user:nuno") {return a.id}}  ));
-        console.log(filt);
         yield put({type:  "GOTO_PAGINA",
                    pagina:{pagina:"EMPREGADOS",
                             contador:0,
@@ -412,13 +378,11 @@ function* showPagina(action) {
    }
    if (action.payload.pagina=="CONTA") {
      try {
-       console.log("----- pag CONTA  -----");//console.log(action.payload);
        if (action.payload.insere)
        {
          let docMesa=action.payload.documento;
          docMesa.nomeCliente=action.payload.nome;
          docMesa.numContribuinte=action.payload.contribuinte;
-         console.log(".-----------");console.log(docMesa);
          const inserido= yield call(saveDoc,docMesa);
          yield put({type: "INSERE_NUM_CONT" })
        }
@@ -459,7 +423,6 @@ function* showPagina(action) {
 
       }}
       catch (e) {
-          console.log("eeeee3");
           var menErr="Sem mensagem de erro"
           if (!(e==null)) {menErr=e.toString()  }
           yield put({type: "ADD_LOG", log:"GOTO CONTA "+ menErr });
@@ -474,7 +437,6 @@ function* showPagina(action) {
                          }});
        }
        catch (e) {
-           console.log("eeeee3");
            var menErr="Sem mensagem de erro"
            if (!(e==null)) {menErr=e.toString()  }
            yield put({type: "ADD_LOG", log:"GOTO LOG "+ menErr });
