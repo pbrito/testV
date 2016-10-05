@@ -21,7 +21,6 @@ const empregadosLista = (state = [], action) => {  // default state is empty Lis
     return state;
     break;
   case "MESAS_FETCH_SUCCEEDED":
-    //console.log(state.toJS());
     return state;
     break;
   default:
@@ -46,13 +45,8 @@ const logActions = (state = [], action) => {  // default state is empty List()}
 }}
 
 const paginaActual = (state =  ([{pagina:"HOME"}]), action) => {
-  console.log("@@@@");
-  console.log(state)
-  console.log("GO");
-  console.log(action);
     switch (action.type) {
         case "GOTO_PAGINA":
-          console.log(action.pagina);
           if(action.pagina.pagina=="EMPREGADOS" && state.length>2)
           {
             return state.slice(0,2);
@@ -63,11 +57,11 @@ const paginaActual = (state =  ([{pagina:"HOME"}]), action) => {
           }
           break;
         case "GOTO_PAGINA_FAILED":
-              return [{pagina:action.message}];
-        break;
+            return [{pagina:action.message}];
+            break;
         case "GOTO_PRIMEIRO":
             return state.slice(0,1).push( (action.pagina));
-        break;
+            break;
         case "GOTO_HOME":
 
           // return fromJS([{pagina:"HOME"}]);
@@ -75,7 +69,6 @@ const paginaActual = (state =  ([{pagina:"HOME"}]), action) => {
           let  stateListLastIndex=state.length-1;
           if(state[stateListLastIndex].pagina=="HOME" && action.payload.modal)
           {
-
               state[stateListLastIndex]= {
                 ...(state[stateListLastIndex]),
                 modal:true,
@@ -86,48 +79,48 @@ const paginaActual = (state =  ([{pagina:"HOME"}]), action) => {
 
           }
 
-         if(state[stateListLastIndex].pagina=="CONTAa")
-            {
-             if( state[stateListLastIndex].dataComeco==null) {
-               let d0= new Date();
-               state[stateListLastIndex]= {
-                 ...(state[stateListLastIndex]),
-                 contador:1,
-                 dataComeco:d0
-               }
-
-                 return state;
-                 break;
-             }
-             else
-             {
-               let d0= new Date();
-               var intervalo = d0 - state[stateListLastIndex].dataComeco;
-                if (intervalo > 1220)
-                {
-                  state[stateListLastIndex].contador = 0;
-                  state[stateListLastIndex].dataComeco= new Date();
-                  return state;
-                }
-
-
-                else {
-                   if ( state[stateListLastIndex].contador  == 2) {
-                        return state.slice(0,2);
-                       break;
-                   }
-                   else
-                    {
-                      state[stateListLastIndex].contador=state[stateListLastIndex].contador+1
-                      return   state;
-                      break;
-                  }
-                }
-           }
-         }
-           else {
+        //  if(state[stateListLastIndex].pagina=="CONTA")
+        //     {
+        //      if( state[stateListLastIndex].dataComeco==null) {
+        //        let d0= new Date();
+        //        state[stateListLastIndex]= {
+        //          ...(state[stateListLastIndex]),
+        //          contador:1,
+        //          dataComeco:d0
+        //        }
+         //
+        //          return state;
+        //          break;
+        //      }
+        //      else
+        //      {
+        //        let d0= new Date();
+        //        var intervalo = d0 - state[stateListLastIndex].dataComeco;
+        //         if (intervalo > 1220)
+        //         {
+        //           state[stateListLastIndex].contador = 0;
+        //           state[stateListLastIndex].dataComeco= new Date();
+        //           return state;
+        //         }
+         //
+         //
+        //         else {
+        //            if ( state[stateListLastIndex].contador  == 2) {
+        //                 return state.slice(0,2);
+        //                break;
+        //            }
+        //            else
+        //             {
+        //               state[stateListLastIndex].contador=state[stateListLastIndex].contador+1
+        //               return   state;
+        //               break;
+        //           }
+        //         }
+        //    }
+        //  }
+          //  else {
               return ([{pagina:"HOME"}]);
-           }
+          //  }
            break;
         default:
           return state;
@@ -165,13 +158,11 @@ const inputExperiencia = (state =  {cxNome:"",cxNumContribuinte:"",inserido:fals
 
           break;
         case "INSERE_NUM_CONT":
-            console.log("iii");
             return {cxNome:state.cxNome ,
               cxNumContribuinte:state.cxNumContribuinte,
               inserido:true};
             break;
         case "CLEAR_INPUT":
-        // console.log("CLLLEASRR");
           return {cxNome : action.payload.nomeCliente,
                   cxNumContribuinte : action.payload.numContribuinte,
                   inserido : false};

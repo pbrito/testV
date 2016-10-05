@@ -8,7 +8,7 @@ import React, { Component } from 'react';
 import {
   AppRegistry,
   StyleSheet,ScrollView,Image,
-  Text,Dimensions,
+  Text,Dimensions,BackAndroid,
   View,  Alert,TextInput,
   TouchableOpacity,
   TouchableHighlight,TouchableWithoutFeedback,
@@ -34,18 +34,18 @@ class testV extends Component {
   constructor(props) {
     super(props);
     this.state = {mesas: [] ,contadorConta:0,dataComeco:0};
+
+  }
+
+  componentDidMount() {
     this.unsubscribe =
               store.subscribe(() =>{
                     this.forceUpdate()}
               );
   }
 
-  componentDidMount() {
-
-  }
-
   componentWillUnmount() {
-    //this.unsubscribe();
+    this.unsubscribe();
   }
 
 
@@ -59,7 +59,9 @@ class testV extends Component {
 
       return (
         <View style={{ backgroundColor:"lightgray"}} >
-          <Text style={{ padding:20}} >{cnt2}Preencha os dados da factura sff    v1.0</Text>
+          <Text style={{ padding:20}} >
+            {cnt2}Preencha os dados da factura sff    v1.0b
+          </Text>
           <View style={{ flex: 1,flexDirection: 'row',justifyContent: 'center'}}>
               <TextInput
                   style={{flex:0.8, borderColor: 'gray', borderWidth: 1,
@@ -284,7 +286,7 @@ desenhaConta(doc) {
               this.setState({contadorConta:0,dataComeco:dataCo})
             }
             else {
-              if ( this.state.contadorConta == 4) {
+              if ( this.state.contadorConta == 3) {
                   this.setState({contadorConta:0,dataComeco:0})
                 store.dispatch({
                               type:"GOTO_HOME",payload:{}})
@@ -323,7 +325,7 @@ desenhaConta(doc) {
         lar=300;
       }
       return(
-             <TouchableHighlight style={{height:91,backgroundColor:"green",
+             <TouchableHighlight style={{height:91,backgroundColor:"coral",
                borderWidth:2,flexWrap: 'wrap',
                          width:80}}
                          key={txt}
@@ -343,10 +345,13 @@ desenhaConta(doc) {
         let lar=30
           return(
                <TouchableHighlight
-                        style={{flex: 1,alignItems:"center",
-                                 backgroundColor:"cyan",borderWidth: 2,
-                                 justifyContent:"center",
-                                 width:Dimensions.get('window').width*0.8
+
+
+                        style={{
+                                      height:Dimensions.get('window').height*0.1,
+                                       backgroundColor:"cyan",alignItems:"center",
+                                       borderWidth: 2,justifyContent:"center",
+                                       width:Dimensions.get('window').width*0.8
                                      }}
                          key={id}
                          onPress={() =>{
@@ -404,35 +409,36 @@ desenhaConta(doc) {
       else
       if (pagina=="EMPREGADOS") {
         let wi=   Dimensions.get('window').width
-        return(<View style={[styles.container]}>
-          <Text style={styles.welcome}>
-              {pagina}  {emp}  {paginaLength}
-          </Text>
-          <View style={{flex: 1,alignItems:"stretch",
-            backgroundColor:"red",
-             width:Dimensions.get('window').width*0.8
-                }}>
+        return(
+          <View style={[styles.container]}>
+            <Text style={styles.welcome}>
+                {pagina}  {emp}  {paginaLength}
+            </Text>
+            <View style={{flex:1,height:100,
+              backgroundColor:"white",flexDirection:"column",
+              width:Dimensions.get('window').width*0.8,justifyContent:"space-around"
+            }}>
+              {conteudoEmpregados()}
 
-          {conteudoEmpregados()}
-        </View>
-          <View style={{flex:0.1,flexDirection:"row"}}>
-               {butao("xmlhttp","xmlhttp",
-                                {type:"SHOW_PAGINA",
-                                                 payload:{
-                                                   pagina:"EMPREGADOS",
+            </View>
+            <View style={{flex:0.1,flexDirection:"row"}}>
+                 {butao("xmlhttp","xmlhttp",
+                                  {type:"SHOW_PAGINA",
+                                                   payload:{
+                                                     pagina:"EMPREGADOS",
+                                                   }
                                                  }
-                                               }
-                      )}
+                        )}
 
-               {butao("log","log",
-                                {type:"SHOW_PAGINA",
-                                                 payload:{
-                                                   pagina:"LOG",
+                 {butao("log","log",
+                                  {type:"SHOW_PAGINA",
+                                                   payload:{
+                                                     pagina:"LOG",
+                                                   }
                                                  }
-                                               }
-                      )}
-              <Text>v1.0</Text>
-          </View>
+                        )}
+                  <Text>v1.0b</Text>
+            </View>
         </View>
         )
 
@@ -487,6 +493,24 @@ desenhaConta(doc) {
 
                                                  }
                         )}
+
+
+            </View>
+            <View style={{flex:0.1,flexDirection:"row"}}>
+
+              <TouchableHighlight style={{height:91,backgroundColor:"green",
+                borderWidth:2,flexWrap: 'wrap',
+                          width:80}}
+                          key="rfei"
+                onPress={() =>{
+                  BackAndroid.exitApp();
+                 }
+              }>
+
+                 <Text>exit</Text>
+
+              </TouchableHighlight>
+
 
 
             </View>

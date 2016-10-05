@@ -3,12 +3,12 @@ import { call, put ,fork} from 'redux-saga/effects'
 import { Map ,List,fromJS} from "immutable";
 import {doSign,constroiMensagem,daSerieTalao,pad2,zeroFill} from "../aux";
 import Alert  from 'react-native';
-let serverUrl='http://192.168.2.1:5984';
+// let serverUrl='http://192.168.2.1:5984';
  // let serverUrl='http://192.168.1.218:5984'
- let db= 's08'
+ let db= 's08ou'
 
 
- // let serverUrl='http://192.168.1.104:5984';
+ let serverUrl='http://192.168.1.104:5984';
 //let serverUrl='http://192.168.10.25:5984'
 
 //let serverUrl='http://192.168.1.218:5984';
@@ -18,118 +18,50 @@ let serverUrl='http://192.168.2.1:5984';
 
 export function  makeRequest (method, url) {
 
+  return new Promise(function (resolve, reject) {
+      var FETCH_TIMEOUT = 2080;
+      var timeout = setTimeout(function() {
+          reject(new Error('Request timed out'));
+      }, FETCH_TIMEOUT);
+      var xhr = new XMLHttpRequest();
 
-  // return   new Promise(function(resolve, reject) {
-  //     var timeout = setTimeout(function() {
-  //         reject(new Error('Request timed out'));
-  //     }, FETCH_TIMEOUT);
-  //
-  //     fetch(url, {  method: method,})
-  //     .then(function(response) {
-  //         clearTimeout(timeout);
-  //         if(timeSim) return;
-  //         if (response && response.status == 200) {
-  //           resolve(response.json());
-  //         }
-  //         else reject(new Error('Response error'));
-  //     })
-  //     .catch(function(err) {
-  //         reject(err);
-  //     });
-  // })
+      console.log("dfghjk111");
 
-
-
-
-return new Promise(function (resolve, reject) {
-    var FETCH_TIMEOUT = 880;
-    var timeout = setTimeout(function() {
-        reject(new Error('Request timed out'));
-    }, FETCH_TIMEOUT);
-    var xhr = new XMLHttpRequest();
-
-    console.log("dfghjk111");
-
-    xhr.open(method, url);
-    xhr.onload = function () {
-        console.log("onload______d_");
+      xhr.open(method, url);
+      xhr.onload = function () {
+          console.log("onload______d_");
           clearTimeout(timeout);
-     if (this.status >= 200 && this.status < 300) {
-       console.log("xhr.response------------------");
-       setTimeout(() => null, 0);
-       resolve(JSON.parse(xhr.response));
+          if (this.status >= 200 && this.status < 300) {
+             console.log("xhr.response------------------");
+             setTimeout(() => null, 0);
+             resolve(JSON.parse(xhr.response));
 
-      } else {
-
+          } else {
+            reject({
+            status: this.status,
+            statusText: xhr.statusText
+            });
+          }
+      };
+      xhr.onerror = function () {
+        console.log("dfghjkqwerty22222");
+        clearTimeout(timeout);
         reject({
           status: this.status,
           statusText: xhr.statusText
         });
-      }
-    };
-    xhr.onerror = function () {
-      console.log("dfghjkqwerty22222");
-        clearTimeout(timeout);
-      reject({
-        status: this.status,
-        statusText: xhr.statusText
-      });
-    };
-    xhr.send();
-    xhr.ontimeout = function (e) {
-       console.log("trime out");
-       clearTimeout(timeout);
-       console.log(e);
-       reject({
-         status: e,
-         statusText: e
-       });
-     };
-  });
-    // return new Promise(function (resolve, reject) {
-    //   var xhr = new XMLHttpRequest();
-    //   xhr.open(method, url,true);
-    //   xhr.onload = function () {
-    //     console.log("onload_______");
-    //    if (this.status >= 200 && this.status < 300) {
-    //      console.log("xhr.response");
-    //      console.log(xhr.response);
-    //      resolve(JSON.parse(xhr.response));
-    //     } else {
-    //       reject({
-    //         status: this.status,
-    //         statusText: "xhr.statusText .... meu"
-    //       });
-    //     }
-    //   };
-    //   xhr.onerror = function () {
-    //     console.log(xhr);
-    //           // Alert.alert(
-    //           //           'Erro',
-    //           //           xhr._response,
-    //           //           [
-    //           //             {text: 'OK', onPress: () => console.log('OK Pressed!')},
-    //           //           ]
-    //           //         );
-    //     reject({
-    //       message: "xhr._response",
-    //       statusText: xhr
-    //     });
-    //   };
-    //
-    //   xhr.timeout = 930; // time in milliseconds
-    //
-    //   xhr.ontimeout = function (e) {
-    //     console.log("trime out");
-    //     console.log(e);
-    //     reject({
-    //       status: e,
-    //       statusText: e
-    //     });
-    //   };
-    //
-    //   xhr.send();
-    // });
+      };
+      xhr.send();
+      xhr.ontimeout = function (e) {
+         console.log("trime out");
+         clearTimeout(timeout);
+         console.log(e);
+         reject({
+           status: e,
+           statusText: e
+         });
+       };
+    });
   }
 
 function saveDoc(doc,id) {
@@ -184,72 +116,9 @@ function saveDoc(doc,id) {
 }
 
 
-// export function fetchMesasEmpregado(userId) {
 //
-//   return  makeRequest('GET', serverUrl+'/_users/'+userId)
-//   .then(function (datums) {
-//     return({mesas:datums.mesas ,
-//           permissoes: datums.permissoes });
-//   })
-//   .catch(function (err) {
-//      throw Error("errrrr fetchMesasEmpregado");
-//   console.error('Augh, there was an error!', err.statusText);
-//   });
-//
-//           //  return fetch('http://192.168.1.104:5984/_users/'+userId)
-//           //     .then((response) => {
-//           //       setTimeout(() => null, 0);
-//           //       // console.log(response)
-//           //       if (!response.ok) {
-//           //            throw Error(response.statusText);
-//           //        }
-//           //       return response.json()
-//           //     }
-//           //     )
-//           //     .then((responseJson) => {
-//           //       return {mesas:responseJson.mesas ,
-//           //               permissoes: responseJson.permissoes }
-//           //     })
-//           //     .catch((error) => {
-//           //        throw Error(error);
-//           //     });
-// }
-
-// worker Saga: will be fired on USER_FETCH_REQUESTED actions
-// function* fetchUser(action) {
-//   let mapMesasAbertas = new Map();
-//   try {
-//       // const user ={mesas: [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18],
-//       //                                               permissoes:false}
-//       // const user = yield call(fetchMesasEmpregado, action.payload.empregado);
-//       // yield put({type: "USER_FETCH_SUCCEEDED", user:{mesas: user.mesas,
-//       //                                               permissoes:user.permissoes}});
-//
-//       if(!action.payload.permissoes ||  action.payload.modal ){
-//             const mesas = yield call(fetchMesasAbertas, action.payload.empregado);
-//             mesas.forEach(function(a){
-//               mapMesasAbertas=mapMesasAbertas.set(a.key,a.value)
-//             })
-//             yield put({type: "MESAS_FETCH_SUCCEEDED", mesas: mesas});
-//             yield put({type:  "GOTO_PAGINA", pagina:{pagina:"MESAS",
-//                                                      empregado:action.payload.empregado,
-//                                                      mesasAbertas:mapMesasAbertas,
-//                                                      permissoes:true}});
-//       }
-//       else {
-//           yield put({type:"GOTO_HOME",payload:{ modal:true,
-//                                                 empregado:action.payload.empregado,}});
-//       }
-//
-//    } catch (e) {
-//       yield put({type: "USER_FETCH_FAILED", message: e.toString()});
-//    }
-// }
-
-
-
 //  docMesa_atualiza - constroi documento a gravar com numT e serie
-
+//
 function docMesa_atualiza(docMesa) {
 
   return new Promise(function (resolve, reject) {
@@ -302,13 +171,12 @@ function docMesa_atualiza(docMesa) {
                       console.error('Augh, there was an error!', err.statusText);
                     });
 
-        }
-     else{
+    }
+    else{
        console.log("nao faz nada kk");
        resolve(null)
             //fica igual
-     }
-
+    }
    })
 }
 
@@ -373,7 +241,7 @@ function* fazGravacao(action) {
     try {
         let docMesa=action.payload.document;
         const docHashAnt = yield call(docMesa_atualiza,
-            JSON.parse(JSON.stringify(docMesa)) );
+                                      JSON.parse(JSON.stringify(docMesa)) );
 
         //TODO por aqui if aberta chama docMesa_atualiza
 
@@ -420,6 +288,12 @@ function all_users(){
   return makeRequest('GET',serverUrl+'/_users/_all_docs')
 }
 
+function fetchMesaDoc(num){
+  console.log("MesaDoc makeRequest "+num);
+  let zz=makeRequest('GET',serverUrl+'/'+db+'/_design/appV/_view/mesasAbertas?key='+num)
+  return zz;
+}
+
 function* fetchEmpregados(action) {
   console.log("gigi");
   yield put({type: "ADD_LOG", log: "vai fazer fetch dos empregados" });
@@ -450,26 +324,23 @@ function fetchMesasAbertasIntersect(mesas){
   return new Promise(function (resolve, reject) {
       makeRequest('GET', serverUrl+'/'+db+'/_design/appV/_view/mesasAbertas')
       .then( (datums)=> {
-        var memp=(mesas);
-        //Intersecçao
-        datums.rows.map(a=> {
-           if ( memp.includes(a.key) ) {
-             memp[memp.indexOf(a.key)]=
-                  {mesa:a.key,total:a.value.total,doc:a.value}
-           }
-          return a;
-        });
-      resolve(memp)
-
+            var memp=(mesas);
+            //Intersecçao
+            datums.rows.map(a=> {
+               if (memp.includes(a.key)) {
+                 memp[memp.indexOf(a.key)]=
+                      {mesa:a.key,total:a.value.total,doc:a.value}
+               }
+              return a;
+            });
+          resolve(memp);
       }).catch(function (err) {
-          console.log(err);
-          reject(err.statusText)
-          throw Error(err);
+                console.log(err);
+                reject(err.statusText)
+                throw Error(err);
         });
   })
 }
-
-
 
 function* fetchMesa(action) {
     try {
@@ -495,12 +366,9 @@ function* showPagina(action) {
 
   if(action.payload.pagina=="MESAS"){
     try {
+      console.log("----- pag MESAS  -----");
       const resul = yield call(fetchEmpregadoDoc, action.payload.empregado);
-      console.log("r1");
-      console.log(resul);
       const resul2 = yield call(fetchMesasAbertasIntersect, resul.mesas );
-      console.log("r2");
-      console.log(resul2);
 
       yield put({type:  "GOTO_PAGINA", pagina:{pagina:"MESAS",
                                                contador:0,
@@ -511,81 +379,85 @@ function* showPagina(action) {
                                              }});
      }
      catch (e) {
-         console.log("erro regegoi");
          var menErr="Sem mensagem de erro"
          if (!(e==null)) {menErr=e.toString()  }
-           yield put({type: "ADD_LOG", log: "erro showpagina pedido empregados"+menErr });
-           yield put({type: "GOTO_PAGINA_FAILED", message: menErr });
-
-
+         console.log("erro showPagina MESAS"+menErr);
+         yield put({type: "ADD_LOG", log: "erro showpagina pedido empregados"+menErr });
+         yield put({type: "GOTO_PAGINA_FAILED", message: menErr });
      }
   }
   if (action.payload.pagina=="EMPREGADOS") {
-    console.log("-----");
+    console.log("----- pag EMPREGADOS  -----");
     try {
-        console.log("222");
         yield put({type: "ADD_LOG", log: "faz pedido empregados" });
         const lista = yield call(all_users, action);
         yield put({type: "ADD_LOG", log: "retorna empregados" });
-
         console.log(lista);
         var filt=(lista.rows.filter(a=>{if (a.id!="_design/_auth" && a.id!="org.couchdb.user:nuno") {return a.id}}  ));
         console.log(filt);
-        yield put({type:  "GOTO_PAGINA", pagina:{pagina:"EMPREGADOS",
-                                                contador:0,
-                                                listaEmpregados:filt,
-                                               }});
+        yield put({type:  "GOTO_PAGINA",
+                   pagina:{pagina:"EMPREGADOS",
+                            contador:0,
+                            listaEmpregados:filt,
+                            }
+        });
      }
      catch (e) {
-         console.log("erro w672");
          var menErr="Sem mensagem de erro"
-         if (!(e==null)) {menErr=e.toString()  }
+         if (!(e==null)) { menErr=e.toString() }
+         console.log("erro pag EMPREGADOS "+menErr);
          yield put({type: "ADD_LOG", log: "erro showpagina pedido empregados"+menErr  });
          yield put({type: "GOTO_PAGINA_FAILED", message: menErr });
      }
    }
    if (action.payload.pagina=="CONTA") {
      try {
-       console.log("CONTA");
-       console.log(action.payload);
+       console.log("----- pag CONTA  -----");//console.log(action.payload);
        if (action.payload.insere)
-        {
+       {
          let docMesa=action.payload.documento;
          docMesa.nomeCliente=action.payload.nome;
-         docMesa.numContribuinte=action.payload.contribuinte
-         console.log(".-----------");
-         console.log(docMesa);
+         docMesa.numContribuinte=action.payload.contribuinte;
+         console.log(".-----------");console.log(docMesa);
          const inserido= yield call(saveDoc,docMesa);
          yield put({type: "INSERE_NUM_CONT" })
        }
-      else{
-       if(Object.keys(action.payload.documento).length !== 0)
-        {
-          yield put({type: "ADD_LOG", log: "GOTO CONTA" });
-          yield put({type:  "GOTO_PAGINA",
-                    pagina:{pagina:"CONTA",
+       else{
+         if(Object.keys(action.payload.documento).length !== 0)
+         {
+
+           yield put({type: "GOTO_PAGINA",
+                     pagina:{pagina:"CONTA",
                             empregado:action.payload.empregado,
                             mesa:action.payload.mesa,
                             documento:action.payload.documento,
                             contador:0,
-                          }});
-         yield put({type: "NEW_INPUT",
+                          }
+           });
+           yield put({type: "ADD_LOG", log: "GOTO_PAGINA CONTA" });
+           yield put({type: "NEW_INPUT",
                             payload:{id:"limpa",
                               cxNome:action.payload.documento.nomeCliente ,
                               cxNumContribuinte:action.payload.documento.numContribuinte}
-                    });
+           });
 
-          if(action.payload.documento.aberta)
-          yield put({type:"GRAVA_CONTA",
-                      payload:{ document:action.payload.documento,
+
+
+           if(action.payload.documento.aberta){
+             //PARA garantir que grava ultima versao => mostra a ultima versao
+              const mesaDocAct = yield call(fetchMesaDoc, action.payload.mesa);
+              let nm=action.payload.documento;
+              if (mesaDocAct.rows.length>0)nm=mesaDocAct.rows[0].value
+              yield put({type:"GRAVA_CONTA",
+                      payload:{ document:nm,
                                 empregado:action.payload.empregado,
-                                                    numContribuinte: "" ,
-                                                    nomeCliente: "" } })
+                                numContribuinte: "" ,
+                                nomeCliente: "" } })
+          }
           //save Documento
         }
 
-      }
-      }
+      }}
       catch (e) {
           console.log("eeeee3");
           var menErr="Sem mensagem de erro"
@@ -626,9 +498,9 @@ function* mySaga2() {
   yield* takeEvery("SHOW_PAGINA", showPagina);
 }
 
-function* mySaga3() {
-  yield* takeEvery("FETCH_EMPREGADOS", fetchEmpregados);
-}
+// function* mySaga3() {
+//   yield* takeEvery("FETCH_EMPREGADOS", fetchEmpregados);
+// }
 
 
 export default function* root() {
