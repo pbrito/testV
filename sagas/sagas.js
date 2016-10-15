@@ -13,7 +13,6 @@ let serverUrl='http://192.168.2.1:5984';
 
 //let serverUrl='http://192.168.1.218:5984';
 
-//let serverUrl='http://pbrito.no-ip.info:2030'
 
 
 export function  makeRequest (method, url) {
