@@ -3,13 +3,13 @@ import { call, put ,fork} from 'redux-saga/effects'
 import { Map ,List,fromJS} from "immutable";
 import {doSign,constroiMensagem,daSerieTalao,pad2,zeroFill} from "../aux";
 import Alert  from 'react-native';
-let serverUrl='http://192.168.2.1:5984';
+//let serverUrl='http://192.168.2.1:5984';
  // let serverUrl='http://192.168.1.218:5984'
- let db= 's08'
+ let db= 's08b'
 
 
  // let serverUrl='http://192.168.1.104:5984';
-//let serverUrl='http://192.168.10.25:5984'
+let serverUrl='http://192.168.10.25:5984'
 
 //let serverUrl='http://192.168.1.218:5984';
 
@@ -150,7 +150,10 @@ function docMesa_atualiza(docMesa) {
                     resolve({doc: docMesa, hashAnterior: hashAnterior})
 
                   }).catch(function (err) {
-                    reject(err.statusText)
+                    reject({
+                            status: "errrrr docMesa_atualiza ",
+                            statusText: err.statusText
+                          });
                       throw Error("errrrr docMesa_atualiza");
                       console.error('Augh, there was an error!', err.statusText);
                     });
@@ -225,34 +228,59 @@ function* fazGravacao(action) {
         //TODO por aqui if aberta chama docMesa_atualiza
 
         if(docHashAnt!=null){
-              const preSave = yield call(saveDoc,
-                                          {type:"lixo"},
-                                          ("lixA"+docHashAnt.doc.serieTalao +"-"+
-                                          docHashAnt.doc.numTalao
-                                            ) );
 
-
+              //a chamada seguinte demora a criar a hash, mas nao tem chamadas á BD
               const inserido= yield call(criaTalaoInsere,docHashAnt);
-              const talaoIn = yield call(saveMesa,{docMesa: docMesa,
+
+              const preSave = yield call(saveDoc,
+                                         {type:"lixo"},
+                                         ("lixA"+docHashAnt.doc.serieTalao +"-"+
+                                            docHashAnt.doc.numTalao
+                                        ));
+
+              try {
+                const talaoIn = yield call(saveMesa,{docMesa: docMesa,
                                                     docTalao: inserido.doc,
                                                     idTalao: inserido.response.id
                                                       });
-              yield put({type:  "GOTO_PAGINA",
-                        pagina:{pagina:"CONTA",
-                                empregado:action.payload.empregado,
-                                mesa:talaoIn.doc.mesa,
-                                documento:talaoIn.doc,
-                                contador:0,
-                              }});
+                yield put({type:  "GOTO_PAGINA",
+                         pagina:{pagina:"CONTA",
+                                 empregado:action.payload.empregado,
+                                 mesa:talaoIn.doc.mesa,
+                                 documento:talaoIn.doc,
+                                 contador:0,
+                                }
+                              });}
+             catch (e) {
+
+               // or transaction rollback
+
+
+                   //  yield put({type:"GRAVA_CONTA",
+                   //          payload:{ document:action.payload.document,
+                   //                    empregado:action.payload.empregado,
+                   //                    numContribuinte: "" ,
+                   //                    nomeCliente: "" } })
+
+                yield put({type: "ADD_LOG", log: "erro fazGravacao  saveMesa Talao "+e.statusText+"  "+e.status  });
+
+              }
         }
 
    } catch (e) {
 
+     //------- mensagemErro
+       var menErr="Sem mensagem de erro"
+       if (!(e==null)) {
+         if (!(e.status==null)) {
+           menErr=e.status.toString() +"   "+e.statusText;
+          }
+          else menErr=e.toString()
+       }
+       yield put({type: "ADD_LOG", log: "erro fazGravacao  "+menErr  });
+     //----fim mensagemErro
 
-     var menErr="Sem mensagem de erro"
-     if (!(e==null)) {menErr=e.toString()  }
-     yield put({type: "ADD_LOG", log: "erro fazGravacao"+menErr  });
-      //yield put({type: "GOTO_PAGINA_FAILED", message: e.message});
+     yield put({type: "GOTO_PAGINA_FAILED", message: "Erro de Gravacao"});
    }}
 }
 
@@ -306,7 +334,10 @@ function fetchMesasAbertasIntersect(mesas){
           resolve(memp);
       }).catch(function (err) {
                 console.log(err);
-                reject(err.statusText)
+                reject({
+                  status: "fetchMesasAbertasIntersect",
+                  statusText:err.statusText
+                })
                 throw Error(err);
         });
   })
