@@ -60,7 +60,7 @@ class testV extends Component {
       return (
         <View style={{ backgroundColor:"lightgray"}} >
           <Text style={{ padding:20}} >
-            {cnt2}Preencha os dados da factura sff    v1.0b
+            Preencha os dados da factura sff
           </Text>
           <View style={{ flex: 1,flexDirection: 'row',justifyContent: 'center'}}>
               <TextInput
@@ -121,9 +121,12 @@ class testV extends Component {
         </View>)
     }
     else {
+      let  stateListLastIndex=store.getState().paginaActual.length-1;
+      let cnt=(store.getState().paginaActual[stateListLastIndex].contador )
+      let cnt2= this.state.contadorConta;
       return (
         <View style={{ backgroundColor:"lightgray"}} >
-          <Text style={{ padding:20}} >Dados Inseridos</Text>
+          <Text style={{ padding:20}} >Dados Inseridos          {cnt2}</Text>
           <View style={{ flex: 1,flexDirection: 'row',justifyContent: 'center'}}>
             <Text
               style={{flex:0.8, borderColor: 'gray',height :40,left:10,right:10}}
@@ -280,13 +283,13 @@ desenhaConta(doc) {
           onPress={()=>{
             let d0= new Date();
             var intervalo = d0 - this.state.dataComeco;
-            if (intervalo > 1220)
+            if (intervalo > 1520)
             {
               var dataCo= new Date();
               this.setState({contadorConta:0,dataComeco:dataCo})
             }
             else {
-              if ( this.state.contadorConta == 3) {
+              if ( this.state.contadorConta > 2) {
                   this.setState({contadorConta:0,dataComeco:0})
                 store.dispatch({
                               type:"GOTO_HOME",payload:{}})
@@ -325,7 +328,7 @@ desenhaConta(doc) {
         lar=300;
       }
       return(
-             <TouchableHighlight style={{height:91,backgroundColor:"coral",
+             <TouchableHighlight style={{height:91,backgroundColor:"yellow",
                borderWidth:2,flexWrap: 'wrap',
                          width:80}}
                          key={txt}
@@ -429,7 +432,7 @@ desenhaConta(doc) {
                                                    }
                                                  }
                         )}
-                  <Text>v1.0b</Text>
+                  <Text>v1.0e</Text>
             </View>
         </View>
         )

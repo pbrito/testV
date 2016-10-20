@@ -60,7 +60,7 @@ class testV extends Component {
       return (
         <View style={{ backgroundColor:"lightgray"}} >
           <Text style={{ padding:20}} >
-            {cnt2}Preencha os dados da factura sff    v1.0c
+            Preencha os dados da factura sff
           </Text>
           <View style={{ flex: 1,flexDirection: 'row',justifyContent: 'center'}}>
               <TextInput
@@ -126,7 +126,7 @@ class testV extends Component {
       let cnt2= this.state.contadorConta;
       return (
         <View style={{ backgroundColor:"lightgray"}} >
-          <Text style={{ padding:20}} >Dados Inseridos        v1.0c   {cnt2}</Text>
+          <Text style={{ padding:20}} >Dados Inseridos          {cnt2}</Text>
           <View style={{ flex: 1,flexDirection: 'row',justifyContent: 'center'}}>
             <Text
               style={{flex:0.8, borderColor: 'gray',height :40,left:10,right:10}}
@@ -328,7 +328,7 @@ desenhaConta(doc) {
         lar=300;
       }
       return(
-             <TouchableHighlight style={{height:91,backgroundColor:"coral",
+             <TouchableHighlight style={{height:91,backgroundColor:"yellow",
                borderWidth:2,flexWrap: 'wrap',
                          width:80}}
                          key={txt}
@@ -432,7 +432,7 @@ desenhaConta(doc) {
                                                    }
                                                  }
                         )}
-                  <Text>v1.0c</Text>
+                  <Text>v1.0e</Text>
             </View>
         </View>
         )

@@ -9,7 +9,7 @@ let serverUrl='http://192.168.2.1:5984';
 
 
  // let serverUrl='http://192.168.1.104:5984';
-//let serverUrl='http://192.168.10.25:5984'
+// let serverUrl='http://192.168.10.25:5984'
 
 //let serverUrl='http://192.168.1.218:5984';
 
@@ -56,8 +56,13 @@ export function  makeRequest (method, url) {
   }
 
 function saveDoc(doc,id) {
+if(doc=="Falha") {return new Promise(function (resolve, reject) {
+                                            reject( "iuytfghjk")
+                                    })
+                  }
   // --grava documento
   return new Promise(function (resolve, reject) {
+
     let htpMode='PUT'
     if(!doc._id==null) { //TODO remover esta
       id=doc._id;
@@ -151,7 +156,7 @@ function docMesa_atualiza(docMesa) {
 
                   }).catch(function (err) {
                     reject(err.statusText)
-                      throw Error("errrrr docMesa_atualiza");
+                      //throw Error("errrrr docMesa_atualiza");
                       console.error('Augh, there was an error!', err.statusText);
                     });
 
@@ -189,26 +194,27 @@ function saveMesa(arrM) {
 
 
 function criaTalaoInsere(docHashAnt) {
-  let document=    docHashAnt.doc  ;
-  let hashAnterior=    docHashAnt.hashAnterior;
-  var d = new Date();
-  var h = zeroFill(d.getHours(), 2);
-  var m = zeroFill(d.getMinutes(), 2);
-  var sc = zeroFill(d.getSeconds(), 2);
+    return new Promise(function (resolve, reject) {
+      let document=    docHashAnt.doc  ;
+      let hashAnterior=    docHashAnt.hashAnterior;
+      var d = new Date();
+      var h = zeroFill(d.getHours(), 2);
+      var m = zeroFill(d.getMinutes(), 2);
+      var sc = zeroFill(d.getSeconds(), 2);
 
-  var ka = h.toString() + ':' + m.toString() + ':' + sc.toString();
-  //hora criacao hash
-  var mensagemAssin = constroiMensagem(document, d, hashAnterior);
-  delete document['_id'];
-  delete document['_rev'];
+      var ka = h.toString() + ':' + m.toString() + ':' + sc.toString();
+      //hora criacao hash
+      var mensagemAssin = constroiMensagem(document, d, hashAnterior);
+      delete document['_id'];
+      delete document['_rev'];
 
-  document.hash = doSign(mensagemAssin);
-  document.mensagem = mensagemAssin;
-  document.hora = ka;
-  document.data = [d.getFullYear(), 1 + d.getMonth(), d.getDate()];
-  document.type = "talao";
-  return saveDoc(document);//promessa
-
+      document.hash = doSign(mensagemAssin);
+      document.mensagem = mensagemAssin;
+      document.hora = ka;
+      document.data = [d.getFullYear(), 1 + d.getMonth(), d.getDate()];
+      document.type = "talao";
+      resolve (document);
+  });
 }
 
 
@@ -225,38 +231,118 @@ function* fazGravacao(action) {
         //TODO por aqui if aberta chama docMesa_atualiza
 
         if(docHashAnt!=null){
-              const preSave = yield call(saveDoc,
+              //Nao insere nada na BD
+              const talaoCriado= yield call(criaTalaoInsere,docHashAnt);
+              if(action.payload.seqError===undefined)
+              {
+                  console.log("PREsave");
+                  console.log("lixA"+docHashAnt.doc.serieTalao +"-"+
+                                docHashAnt.doc.numTalao);
+                  const preSave = yield call(saveDoc,
                                           {type:"lixo"},
                                           ("lixA"+docHashAnt.doc.serieTalao +"-"+
                                           docHashAnt.doc.numTalao
                                             ) );
+              }
+              try {
+                const inserido=null;
+                if((action.payload.seqError===undefined)||(action.payload.seqError==1))
+                {
+                    inserido=  yield call(saveDoc,talaoCriado);// Inserir talao na BD
+
+                }
+                  try {
+
+                    let docTalao=null;
+                    let vidTalao=null;
+
+                    if(action.payload.seqError==2){
+                      docTalao= action.payload.docTalao
+                      vidTalao= action.payload.vidTalao
+                    }
+                    else {
+                      docTalao= inserido.doc,
+                      vidTalao= inserido.response.id
+                    }
+                    const talaoIn =  yield call(saveMesa,{docMesa: docMesa,
+                                                           docTalao: docTalao,
+                                                           vidTalao: vidTalao
+                                                              });
+                    yield put({type:  "GOTO_PAGINA",
+                                pagina:{pagina:"CONTA",
+                                        empregado:action.payload.empregado,
+                                        mesa:talaoIn.doc.mesa,
+                                        documento:talaoIn.doc,
+                                        contador:0,
+                                      }});
+                  } catch (e) {
 
 
-              const inserido= yield call(criaTalaoInsere,docHashAnt);
-              const talaoIn = yield call(saveMesa,{docMesa: docMesa,
-                                                    docTalao: inserido.doc,
-                                                    idTalao: inserido.response.id
-                                                      });
-              yield put({type:  "GOTO_PAGINA",
-                        pagina:{pagina:"CONTA",
-                                empregado:action.payload.empregado,
-                                mesa:talaoIn.doc.mesa,
-                                documento:talaoIn.doc,
-                                contador:0,
-                              }});
+                    let docTalao=null;
+                    let vidTalao=null;
+
+                    if(action.payload.seqError==2){
+                      docTalao= action.payload.docTalao
+                      vidTalao= action.payload.vidTalao
+                    }
+                    else {
+                      docTalao= inserido.doc,
+                      vidTalao= inserido.response.id
+                    }
+                    let contadErr=0;
+                    if(!(action.payload.contadErr==null)) contadErr=action.payload.contadErr+1
+
+
+                    yield put({type: "ADD_LOG", log: "erro gravacao Mesa fazGravacao"+e.toString()  });
+                    if(contadErr>3)
+                      yield put({type: "GOTO_PAGINA_FAILED", message: e.toString()});
+                    else
+                      yield put({type:"GRAVA_CONTA",
+                            payload:{ document:action.payload.document,
+                                      empregado:action.payload.empregado,
+                                      numContribuinte: "" ,
+                                      nomeCliente: "" ,
+                                      seqError: 2,
+                                      docTalao: docTalao,
+                                      vidTalao: vidTalao,
+                                      contadErr:contadErr
+                                    } })
+                  }
+
+              } catch (e) {
+                let contadErr=0;
+                if(!(action.payload.contadErr==null)) contadErr=action.payload.contadErr+1
+
+                yield put({type: "ADD_LOG", log: "erro gravacao Taloao fazGravacao"+e.toString()  });
+                if(contadErr>3)
+                  yield put({type: "GOTO_PAGINA_FAILED", message: e.toString()});
+                else
+                  yield put({type:"GRAVA_CONTA",
+                        payload:{ document:action.payload.document,
+                                  empregado:action.payload.empregado,
+                                  numContribuinte: "" ,
+                                  nomeCliente: "" ,
+                                  seqError: 1,
+                                  contadErr:contadErr
+                                } })
+              }
         }
 
    } catch (e) {
-
+     // ciclo - volta a tentar gravar pq ate este momento apenas foram feitas pesquisas
+     //                                                sem insersoes na BD
+     yield put({type:"GRAVA_CONTA",
+             payload:{ document:action.payload.document,
+                       empregado:action.payload.empregado,
+                       numContribuinte: "" ,
+                       nomeCliente: "" } })
 
      var menErr="Sem mensagem de erro"
      if (!(e==null)) {menErr=e.toString()  }
-     yield put({type: "ADD_LOG", log: "erro fazGravacao"+menErr  });
-      //yield put({type: "GOTO_PAGINA_FAILED", message: e.message});
+     yield put({type: "ADD_LOG", log: "erro preGravacao -fazGravacao"+menErr  });
+    //  yield put({type: "GOTO_PAGINA_FAILED", message: menErr});
    }}
 }
-
-
 
 function all_users(){
   return makeRequest('GET',serverUrl+'/_users/_all_docs')
@@ -269,21 +355,20 @@ function fetchMesaDoc(num){
 
 function* fetchEmpregados(action) {
   yield put({type: "ADD_LOG", log: "vai fazer fetch dos empregados" });
-
-    try {
+  try {
 
         const lista = yield call(all_users, action);
         yield put({type: "ADD_LOG", log: "ja fez fetch dos empregados" });
         var filt=(lista.rows.filter(a=>{if (a.id!="_design/_auth" && a.id!="org.couchdb.user:nuno") {return a.id}}  ));
 
         yield put({type:"ADD_EMPREGADOS",lista:filt })
-     }
-     catch (e) {
+  }
+  catch (e) {
          var menErr="Sem mensagem de erro"
          if (!(e==null)) {menErr=e.toString()  }
          yield put({type: "ADD_LOG", log: "erro pedido f empregados"+menErr });
          yield put({type: "GOTO_PAGINA_FAILED", message: menErr});
-     }
+  }
 }
 
 function fetchEmpregadoDoc(empregado) {
@@ -305,9 +390,7 @@ function fetchMesasAbertasIntersect(mesas){
             });
           resolve(memp);
       }).catch(function (err) {
-                console.log(err);
                 reject(err.statusText)
-                throw Error(err);
         });
   })
 }
@@ -348,7 +431,7 @@ function* showPagina(action) {
      catch (e) {
          var menErr="Sem mensagem de erro"
          if (!(e==null)) {menErr=e.toString()  }
-         yield put({type: "ADD_LOG", log: "erro showpagina pedido empregados"+menErr });
+         yield put({type: "ADD_LOG", log: "erro showpagina pedido mesas"+menErr });
          yield put({type: "GOTO_PAGINA_FAILED", message: menErr });
      }
   }
