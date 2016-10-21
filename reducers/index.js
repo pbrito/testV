@@ -34,7 +34,7 @@ const logActions = (state = [], action) => {  // default state is empty List()}
   case  "ADD_LOG":
     state.push(action.log)
     if(state.length>50)
-    return state.slice(state.length-5,state.length)
+    return state.slice(0,state.length-5)
     else {
     return state;
     }

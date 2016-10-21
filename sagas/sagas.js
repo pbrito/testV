@@ -162,7 +162,7 @@ function docMesa_atualiza(docMesa) {
 
     }
     else{
-       console.log("nao faz nada kk");
+      //  console.log("nao faz nada kk");
        resolve(null)
             //fica igual
     }
@@ -235,9 +235,9 @@ function* fazGravacao(action) {
               const talaoCriado= yield call(criaTalaoInsere,docHashAnt);
               if(action.payload.seqError===undefined)
               {
-                  console.log("PREsave");
-                  console.log("lixA"+docHashAnt.doc.serieTalao +"-"+
-                                docHashAnt.doc.numTalao);
+                  // console.log("PREsave");
+                  // console.log("lixA"+docHashAnt.doc.serieTalao +"-"+
+                  //               docHashAnt.doc.numTalao);
                   const preSave = yield call(saveDoc,
                                           {type:"lixo"},
                                           ("lixA"+docHashAnt.doc.serieTalao +"-"+
@@ -307,6 +307,10 @@ function* fazGravacao(action) {
                                       vidTalao: vidTalao,
                                       contadErr:contadErr
                                     } })
+                    yield call(saveDoc,
+                                      {type:"erroL"},
+                                      ("lixA"+docTalao +"-"+vidTalao
+                                        ) );
                   }
 
               } catch (e) {
