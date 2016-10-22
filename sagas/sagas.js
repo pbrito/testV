@@ -9,7 +9,7 @@ let serverUrl='http://192.168.2.1:5984';
  let db= 's08'
 
 
- // let serverUrl='http://192.168.1.104:5984';
+ let serverUrl= 'http://192.168.1.104:5984';
 // let serverUrl='http://192.168.10.25:5984'
 
 //let serverUrl='http://192.168.1.218:5984';

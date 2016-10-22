@@ -33,7 +33,7 @@ sagaMiddleware.run(mySaga)
 class testV extends Component {
   constructor(props) {
     super(props);
-    this.state = {mesas: [] ,contadorConta:0,dataComeco:0,isConnected: null,};
+    this.state = {mesas: [] ,contadorConta:0,dataComeco:0,isConnected: null,bateriaEstado:0};
 
   }
 
@@ -148,7 +148,7 @@ class testV extends Component {
       let cnt2= this.state.contadorConta;
       return (
         <View style={{ backgroundColor:"lightgray"}} >
-          <Text style={{ padding:20}} >Dados Inseridos          {cnt2}</Text>
+          <Text style={{ padding:20}} >Dados Inseridos          {/*cnt2*/}</Text>
           <View style={{ flex: 1,flexDirection: 'row',justifyContent: 'center'}}>
             <Text
               style={{flex:0.8, borderColor: 'gray',height :40,left:10,right:10}}
@@ -393,17 +393,20 @@ desenhaConta(doc) {
     let pagina=(store.getState().paginaActual[stateListLastIndex].pagina )
     let paginaLength=(store.getState().paginaActual.length )
     let lastP= store.getState().paginaActual[stateListLastIndex];
+// console.log("wwwwwww");
 
-
-    console.log("wWWW");
-     var MyBattery = NativeModules.MyBattery;
-    MyBattery.isCharging().then(isCharging => {
-      console.log(isCharging) // true or false
-    });
+      var MyBattery = NativeModules.MyBattery;
+    // MyBattery.isCharging().then(isCharging => {
+    //   console.log(isCharging) // true or false
+    // });
 
     MyBattery.getBatteryLevel().then(level => {
-  console.log(level*100); // between 0 and 1
-});
+      if(this.state.bateriaEstado!= level*100)
+           this.setState({
+             bateriaEstado:(level*100).toFixed(0)
+           });
+
+    });
 
 
     var conteudoEmpregados=()=>
@@ -438,7 +441,7 @@ desenhaConta(doc) {
         return(
           <View style={[styles.container]}>
             <Text style={styles.welcome}>
-                {pagina} {emp} {paginaLength} {this.state.isConnected ? 'Online' : 'Offline'}
+              {this.state.bateriaEstado}  {pagina} {emp} {paginaLength} {this.state.isConnected ? 'Online' : 'Offline'}
             </Text>
             <View style={{flex:1,height:100,
               backgroundColor:"white",flexDirection:"column",
@@ -474,7 +477,7 @@ desenhaConta(doc) {
         let widD= Dimensions.get('window').width;
         return (<View style={styles.container}>
           <Text style={styles.welcome}>
-              {pagina}  {emp} {paginaLength} {this.state.isConnected ? 'Online' : 'Offline'}
+            {this.state.bateriaEstado}  {pagina}  {emp} {paginaLength} {this.state.isConnected ? 'Online' : 'Offline'}
           </Text>
           <View style={{flex:1,backgroundColor:"cyan",flexDirection:"row",
             alignItems: "stretch",flexWrap: 'wrap',
@@ -501,7 +504,7 @@ desenhaConta(doc) {
         return (
           <View style={styles.container}>
             <Text style={styles.welcome}>
-                {pagina}  {emp}  {paginaLength} {this.state.isConnected ? 'Online' : 'Offline'}
+            {this.state.bateriaEstado}    {pagina}  {emp}  {paginaLength} {this.state.isConnected ? 'Online' : 'Offline'}
             </Text>
               <View style={{flex:1,backgroundColor:"cyan",flexDirection:"column",
                                     alignItems: "stretch",flexWrap: 'wrap',
