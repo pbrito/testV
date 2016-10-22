@@ -51,6 +51,15 @@ const paginaActual = (state =  ([{pagina:"HOME"}]), action) => {
           {
             return state.slice(0,2);
           }
+          else if(action.pagina.pagina=="CONTA" && state.length>2)
+          {
+            let  stateListLastIndex=state.length-1;
+            if(!(state[stateListLastIndex].pagina=="CONTA"))
+            {
+              state.push( (action.pagina))
+            }
+            return state;
+          }
           else {
             state.push( (action.pagina))
             return state;

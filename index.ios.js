@@ -5,7 +5,7 @@
  */
 
 import React, { Component } from 'react';
-import {
+import {NetInfo,
   AppRegistry,
   StyleSheet,ScrollView,Image,
   Text,Dimensions,BackAndroid,
@@ -13,7 +13,7 @@ import {
   TouchableOpacity,
   TouchableHighlight,TouchableWithoutFeedback,
 } from 'react-native';
-
+import BatteryStatus from 'react-native-battery-status';
 import { createStore, applyMiddleware } from 'redux'
 import createSagaMiddleware from 'redux-saga'
 import appReducers from "./reducers/index"
@@ -33,7 +33,7 @@ sagaMiddleware.run(mySaga)
 class testV extends Component {
   constructor(props) {
     super(props);
-    this.state = {mesas: [] ,contadorConta:0,dataComeco:0};
+    this.state = {mesas: [] ,contadorConta:0,dataComeco:0,isConnected: null,};
 
   }
 
@@ -42,10 +42,29 @@ class testV extends Component {
               store.subscribe(() =>{
                     this.forceUpdate()}
               );
+    NetInfo.isConnected.addEventListener(
+      'change',
+      (isConnected) => {
+               this.setState({
+                 isConnected,
+               });
+             }
+    );
+    NetInfo.isConnected.fetch().done(
+        (isConnected) => { this.setState({isConnected}); }
+    );
   }
 
   componentWillUnmount() {
     this.unsubscribe();
+    NetInfo.isConnected.removeEventListener(
+        'change',
+        (isConnected) => {
+                        this.setState({
+                          isConnected,
+                        });
+                      }
+    );
   }
 
 
@@ -407,7 +426,7 @@ desenhaConta(doc) {
         return(
           <View style={[styles.container]}>
             <Text style={styles.welcome}>
-                {pagina}  {emp}  {paginaLength}
+                {pagina} {emp} {paginaLength} {this.state.isConnected ? 'Online' : 'Offline'}
             </Text>
             <View style={{flex:1,height:100,
               backgroundColor:"white",flexDirection:"column",
@@ -443,7 +462,7 @@ desenhaConta(doc) {
         let widD= Dimensions.get('window').width;
         return (<View style={styles.container}>
           <Text style={styles.welcome}>
-              {pagina}  {emp}  {paginaLength}
+              {pagina}  {emp} {paginaLength} {this.state.isConnected ? 'Online' : 'Offline'}
           </Text>
           <View style={{flex:1,backgroundColor:"cyan",flexDirection:"row",
             alignItems: "stretch",flexWrap: 'wrap',
@@ -470,7 +489,7 @@ desenhaConta(doc) {
         return (
           <View style={styles.container}>
             <Text style={styles.welcome}>
-                {pagina}  {emp}  {paginaLength}
+                {pagina}  {emp}  {paginaLength} {this.state.isConnected ? 'Online' : 'Offline'}
             </Text>
               <View style={{flex:1,backgroundColor:"cyan",flexDirection:"column",
                                     alignItems: "stretch",flexWrap: 'wrap',

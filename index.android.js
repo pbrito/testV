@@ -5,7 +5,7 @@
  */
 
 import React, { Component } from 'react';
-import {
+import {NetInfo,NativeModules,
   AppRegistry,
   StyleSheet,ScrollView,Image,
   Text,Dimensions,BackAndroid,
@@ -33,19 +33,41 @@ sagaMiddleware.run(mySaga)
 class testV extends Component {
   constructor(props) {
     super(props);
-    this.state = {mesas: [] ,contadorConta:0,dataComeco:0};
+    this.state = {mesas: [] ,contadorConta:0,dataComeco:0,isConnected: null,};
 
   }
 
   componentDidMount() {
+
     this.unsubscribe =
               store.subscribe(() =>{
                     this.forceUpdate()}
               );
+
+
+    NetInfo.isConnected.addEventListener(
+      'change',
+      (isConnected) => {
+               this.setState({
+                 isConnected,
+               });
+             }
+    );
+    NetInfo.isConnected.fetch().done(
+        (isConnected) => { this.setState({isConnected}); }
+    );
   }
 
   componentWillUnmount() {
     this.unsubscribe();
+    NetInfo.isConnected.removeEventListener(
+        'change',
+        (isConnected) => {
+                        this.setState({
+                          isConnected,
+                        });
+                      }
+    );
   }
 
 
@@ -373,6 +395,15 @@ desenhaConta(doc) {
     let lastP= store.getState().paginaActual[stateListLastIndex];
 
 
+    console.log("wWWW");
+     var MyBattery = NativeModules.MyBattery;
+    MyBattery.isCharging().then(isCharging => {
+      console.log(isCharging) // true or false
+    });
+
+    MyBattery.getBatteryLevel().then(level => {
+  console.log(level*100); // between 0 and 1
+});
 
 
     var conteudoEmpregados=()=>
@@ -407,7 +438,7 @@ desenhaConta(doc) {
         return(
           <View style={[styles.container]}>
             <Text style={styles.welcome}>
-                {pagina}  {emp}  {paginaLength}
+                {pagina} {emp} {paginaLength} {this.state.isConnected ? 'Online' : 'Offline'}
             </Text>
             <View style={{flex:1,height:100,
               backgroundColor:"white",flexDirection:"column",
@@ -443,7 +474,7 @@ desenhaConta(doc) {
         let widD= Dimensions.get('window').width;
         return (<View style={styles.container}>
           <Text style={styles.welcome}>
-              {pagina}  {emp}  {paginaLength}
+              {pagina}  {emp} {paginaLength} {this.state.isConnected ? 'Online' : 'Offline'}
           </Text>
           <View style={{flex:1,backgroundColor:"cyan",flexDirection:"row",
             alignItems: "stretch",flexWrap: 'wrap',
@@ -470,7 +501,7 @@ desenhaConta(doc) {
         return (
           <View style={styles.container}>
             <Text style={styles.welcome}>
-                {pagina}  {emp}  {paginaLength}
+                {pagina}  {emp}  {paginaLength} {this.state.isConnected ? 'Online' : 'Offline'}
             </Text>
               <View style={{flex:1,backgroundColor:"cyan",flexDirection:"column",
                                     alignItems: "stretch",flexWrap: 'wrap',

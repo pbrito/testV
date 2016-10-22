@@ -5,6 +5,7 @@ import {doSign,constroiMensagem,daSerieTalao,pad2,zeroFill} from "../aux";
 import Alert  from 'react-native';
 let serverUrl='http://192.168.2.1:5984';
  // let serverUrl='http://192.168.1.218:5984'
+ // let serverUrl='http://192.168.1.70:5984';
  let db= 's08'
 
 
@@ -441,9 +442,9 @@ function* showPagina(action) {
   }
   if (action.payload.pagina=="EMPREGADOS") {
     try {
-        yield put({type: "ADD_LOG", log: "faz pedido empregados" });
         const lista = yield call(all_users, action);
-        yield put({type: "ADD_LOG", log: "retorna empregados" });
+        yield put({type: "ADD_LOG", log: "faz pedido empregados" });
+        // yield put({type: "ADD_LOG", log: "retorna empregados" });
         var filt=(lista.rows.filter(a=>{if (a.id!="_design/_auth" && a.id!="org.couchdb.user:nuno") {return a.id}}  ));
         yield put({type:  "GOTO_PAGINA",
                    pagina:{pagina:"EMPREGADOS",
